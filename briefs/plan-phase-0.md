@@ -28,7 +28,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: vswhere reports an MSVC x64 toolset (else BLOCKED with the exact missing component); `D:\Development\vcpkg\vcpkg.exe install capnproto:x64-windows` succeeds; `capnp --version` prints `Cap'n Proto version 1.4.0`
   DoD: absolute path of `capnp.exe` recorded in the results file; commit `build(toolchain): install capnp 1.4.0 via vcpkg [FEAT-169]`
 
-- [ ] [P0-F-003] Install Inno Setup 7.1.1 with winget and verify ISCC [FEAT-169, FEAT-163] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-003]
+- [x] [P0-F-003] Install Inno Setup 7.1.1 with winget and verify ISCC [FEAT-169, FEAT-163] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-003]
   Needs: user approval in chat
   Files: qa/manual/results/p0-f-toolchain.md (append section)
   Tests: `winget show --id JRSoftware.InnoSetup.7 --exact` (read-only) reports version 7.1.1 and the installer SHA-256 recorded in D-118 (anything else: BLOCKED, ask the user); `winget install --id JRSoftware.InnoSetup.7 --exact --version 7.1.1` succeeds; `ISCC.exe --version` reports 7.1.1; a one-line scratch script compiles with ISCC into the scratchpad directory (the produced setup is never run)
