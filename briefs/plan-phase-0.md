@@ -328,7 +328,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests (host, loopback unicast only): TestDatagramLatency_Idle, TestDatagramLatency_UnderBulk (urgency 7 stream saturating), TestInputStreamLatency_UnderBulk (urgency 0 small frames), TestTCPFallbackLatency_UnderBulk (two TLS connections); each logs p50/p99/max over 10 s at 1000 Hz; cmd/quicbench provides an echo-based LAN mode for the user's two PCs
   DoD: spike gates green; numbers copied into README; uses quic-go v0.64.1; commit `spike(net): QUIC datagram and priority latency bench [FEAT-177]`
 
-- [ ] [P0-SP5-003] mDNS discovery spike (hashicorp/mdns vs brutella/dnssd) [FEAT-177, FEAT-129] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-003]
+- [x] [P0-SP5-003] mDNS discovery spike (hashicorp/mdns vs brutella/dnssd) [FEAT-177, FEAT-129] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-003]
   Needs: P0-F-005
   Files: spikes/mdns/cmd/mdnsprobe/main.go, spikes/mdns/README.md
   Tests: spike must demonstrate (user run on 2 Windows PCs + GNOME box, incl. machines with WireGuard/Netbird adapters): advertise `_edgesync._udp` with TXT keys from D-43, browse, time-to-first-discovery, interfaces used, behaviour with VPN adapters, Windows firewall prompt; `-lib=hashicorp|dnssd`
