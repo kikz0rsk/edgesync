@@ -259,7 +259,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: `GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build ./macos/...` and `GOARCH=amd64` on the host; TestDisplays_ListBoundsAndScale (integration, CI macOS) incl. a `CGWarpMouseCursorPosition` call with CGPoint by value followed by a position read-back
   DoD: spike gates green; uses github.com/ebitengine/purego v0.11.2; commit `spike(macos): purego bindings and displays [FEAT-177]`
 
-- [ ] [P0-SP4-002] CGEventTap on a locked CFRunLoop thread with re-enable handling [FEAT-177, FEAT-052, FEAT-053, FEAT-056] [tier:sonnet why:purego callbacks on a CFRunLoop thread and tap disable/re-enable semantics] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-002]
+- [x] [P0-SP4-002] CGEventTap on a locked CFRunLoop thread with re-enable handling [FEAT-177, FEAT-052, FEAT-053, FEAT-056] [tier:sonnet why:purego callbacks on a CFRunLoop thread and tap disable/re-enable semantics] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-002]
   Needs: P0-SP4-001
   Files: spikes/macos/tap/tap_darwin.go, spikes/macos/tap/runloop_darwin.go, spikes/macos/tap/permissions_darwin.go, spikes/macos/tap/tap_integration_test.go, spikes/macos/cmd/tap/main.go
   Tests: TestTap_CreateSessionTapReportsTrustState (integration, CI): logs `AXIsProcessTrusted`, `CGPreflightListenEventAccess`, `CGPreflightPostEventAccess`, whether an active session tap and a listen-only tap can be created; when created, synthetic events posted by the test are observed and timeout re-enable code path executes
