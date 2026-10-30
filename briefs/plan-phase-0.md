@@ -303,7 +303,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### SP5 - Core tech (Gio editor, QUIC, mDNS, Cap'n Proto, SPAKE2, IPC)
 
-- [ ] [P0-SP5-001] Gio layout-editor proof [FEAT-177, FEAT-147] [tier:sonnet why:Gio immediate-mode pointer and drag model drives the P3 editor design] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-001]
+- [x] [P0-SP5-001] Gio layout-editor proof [FEAT-177, FEAT-147] [tier:sonnet why:Gio immediate-mode pointer and drag model drives the P3 editor design] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-001]
   Needs: P0-F-005
   Files: spikes/gioeditor/main.go, spikes/gioeditor/canvas.go, spikes/gioeditor/snap.go, spikes/gioeditor/snap_test.go, spikes/gioeditor/README.md
   Tests: TestSnap_ToNeighbourEdgeWithinThreshold, TestSnap_NoSnapBeyondThreshold, TestSnap_PrefersClosestEdge, TestSnap_OverlapSegment (host); spike must demonstrate (user run): drag of multi-monitor machine groups, snapping within 12 logical px, overlap highlight, Ctrl+wheel zoom, middle-drag pan, arrow-key nudge (Shift = 10 px), light/dark palette toggle, frame-time log with `-machines 64`
