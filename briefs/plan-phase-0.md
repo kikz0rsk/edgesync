@@ -34,18 +34,18 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: `winget show --id JRSoftware.InnoSetup.7 --exact` (read-only) reports version 7.1.1 and the installer SHA-256 recorded in D-118 (anything else: BLOCKED, ask the user); `winget install --id JRSoftware.InnoSetup.7 --exact --version 7.1.1` succeeds; `ISCC.exe --version` reports 7.1.1; a one-line scratch script compiles with ISCC into the scratchpad directory (the produced setup is never run)
   DoD: package id, version, installer SHA-256 and the absolute path of `ISCC.exe` recorded in the results file (the id `JRSoftware.InnoSetup` is Inno Setup 6 and must not be used); commit `build(toolchain): install Inno Setup 7.1.1 [FEAT-169]`
 
-- [ ] [P0-F-004] Repository scaffold: go.mod, LICENSE, README, .gitattributes, .editorconfig [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-004]
+- [x] [P0-F-004] Repository scaffold: go.mod, LICENSE, README, .gitattributes, .editorconfig [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-004]
   Files: go.mod, LICENSE, README.md, .gitattributes, .editorconfig
   Tests: `go mod edit -json` shows `"Path": "github.com/kikz0r/edgesync"` and `"Go": "1.27"`; `go build ./...` exits 0
   DoD: LICENSE is the MIT text with "Copyright (c) 2026 kikz0r" (D-79); README has project summary, status "in development", link to plan.md; .gitattributes sets `* text=auto eol=lf`, binary for `*.syso *.png *.ico *.icns *.zip`; .editorconfig (LF, UTF-8, tabs for .go, 2 spaces for yml/yaml/toml/md/capnp); commit `chore(repo): scaffold module and repository files [FEAT-169]`
 
-- [ ] [P0-F-005] Spikes module and spikes CI workflow [FEAT-177, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-005]
+- [x] [P0-F-005] Spikes module and spikes CI workflow [FEAT-177, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-005]
   Needs: P0-F-004
   Files: spikes/go.mod, spikes/README.md, .github/workflows/spikes.yml
   Tests: `go -C spikes build ./...` exits 0; `spikes.yml` is a `workflow_dispatch` workflow with jobs `windows` (windows-latest), `macos` (macos-latest), `linux` (ubuntu-24.04 with `xvfb` installed and `Xvfb :99` started, `DISPLAY=:99`), each running `go -C spikes vet ./...`, `go -C spikes build ./...`, `go -C spikes test -tags integration ./...` and uploading `spikes/out/**` as an artifact
   DoD: spikes/go.mod is `module github.com/kikz0r/edgesync/spikes`, `go 1.27`; README states the spike rules (D-74) verbatim; action versions pinned to exact release tags verified via the GitHub API at execution time; commit `ci(spikes): add spikes module and dispatch workflow [FEAT-177]`
 
-- [ ] [P0-F-006] Tools alternate module with pinned tool directives [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-006]
+- [x] [P0-F-006] Tools alternate module with pinned tool directives [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-006]
   Needs: P0-F-004
   Files: tools/tools.mod, tools/tools.sum
   Tests: from the repo root each of these runs and prints its version or help: `go tool -modfile=tools/tools.mod gofumpt -version` (v0.12.0), `go tool -modfile=tools/tools.mod govulncheck -version` (x/vuln v1.9.0), `go tool -modfile=tools/tools.mod actionlint -version` (1.7.12), `go tool -modfile=tools/tools.mod goversioninfo -h`, `go build -modfile=tools/tools.mod -o bin/capnpc-go.exe capnproto.org/go/capnp/v3/capnpc-go`; root `go.mod` unchanged

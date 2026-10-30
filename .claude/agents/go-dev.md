@@ -29,6 +29,7 @@ Gates before you report (run all that apply; report each):
 - Workflows touched: `go tool -modfile=tools/tools.mod actionlint`
 - Spike items: the "spike gates" from `briefs/plan-phase-0.md` instead of the main-module gates.
 If a gate fails and the fix is not inside your briefed files, stop and report BLOCKED - never widen scope to make a gate pass.
+Empty-module exception: while a module has no Go packages yet (early P0 and P1-F), `go vet ./...`, `go test ./...` and cross-compile patterns naming directories that do not exist exit 1 with "no packages" or a missing-path error. That is not a gate failure: run only the gates your item's `Tests:` line names, build with the patterns of directories that exist, and write `n/a - no packages yet` for the rest in GATES.
 
 Never run: the EdgeSync agent, GUI or service, any spike binary, tests tagged `integration`, installers, or
 anything that changes PATH, the registry, services or system settings. Building binaries is allowed.
