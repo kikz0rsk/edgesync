@@ -103,7 +103,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestRealEdges_SideBySide, TestRealEdges_LShape, TestRealEdges_StackedWithOffset, TestRealEdges_GapBetweenMonitors, TestRealEdges_MixedSizes (host); spike must demonstrate: monitor list with physical bounds and DPI; absolute moves to each monitor's corners and centre with `GetCursorPos` read-back error in px; scancode typing of a fixed pattern incl. extended keys (arrows, Right Ctrl, numpad Enter) into Notepad; wheel, hwheel, X1/X2; per-call SendInput latency
   DoD: spike gates green; .syso generated with `go tool -modfile=tools/tools.mod goversioninfo` from versioninfo.json + manifest.xml (PerMonitorV2); commit `spike(win): injection and per-monitor DPI edges [FEAT-177]`
 
-- [ ] [P0-SP1-003] Cursor hide and park strategies while grabbed [FEAT-177, FEAT-034] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-003]
+- [x] [P0-SP1-003] Cursor hide and park strategies while grabbed [FEAT-177, FEAT-034] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-003]
   Needs: P0-SP1-001
   Files: spikes/wincursor/main.go, spikes/wincursor/strategies_windows.go, spikes/wincursor/README.md
   Tests: spike must demonstrate for strategies (a) ClipCursor 1x1 + SetCursorPos, (b) 1x1 topmost window + SetCapture, (c) transparent cursor on a fullscreen layered window: cursor invisible over normal apps, over a fullscreen video, over Task Manager (elevated), restoration after normal exit and after `taskkill /F`
