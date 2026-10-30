@@ -85,7 +85,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### SP1 - Windows input, DPI, service and secure desktop
 
-- [ ] [P0-SP1-001] LL hook spike with ring buffer, GC stress, watchdog and Raw Input deltas [FEAT-177, FEAT-033] [tier:sonnet why:LL-hook message-loop threading and non-allocating callbacks under GC pressure] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-001]
+- [x] [P0-SP1-001] LL hook spike with ring buffer, GC stress, watchdog and Raw Input deltas [FEAT-177, FEAT-033] [tier:sonnet why:LL-hook message-loop threading and non-allocating callbacks under GC pressure] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-001]
   Needs: P0-F-005
   Files: spikes/internal/winhook/hook_windows.go, spikes/internal/winhook/rawinput_windows.go, spikes/internal/winhook/watchdog_windows.go, spikes/internal/winhook/ring.go, spikes/internal/winhook/ring_test.go, spikes/internal/stats/histogram.go, spikes/internal/stats/histogram_test.go, spikes/winhooks/main.go, spikes/winhooks/README.md
   Tests: TestRing_PushPopWrapAround, TestRing_FullDropsAndCounts, TestHistogram_Percentiles (host); spike must demonstrate (user run): callback duration p50/p99/max with and without `-gcstress`, events/s, ring drops, watchdog re-installs (forced by `-stall` that blocks the callback 1500 ms once), suppression toggle via Scroll Lock, Raw Input delta sums vs hook pt deltas at screen edges (clamping evidence)
