@@ -1,0 +1,72 @@
+version: "2"
+run:
+  go: "1.27"
+  tests: true
+  build-tags: [integration]
+linters:
+  default: none
+  enable: [errcheck, govet, ineffassign, staticcheck, unused, gosec, errorlint, bodyclose, noctx, contextcheck, exhaustive, nilerr, sloglint, revive, gocritic, unparam, unconvert, perfsprint, copyloopvar, intrange, errname, usestdlibvars, paralleltest, thelper, nolintlint, forbidigo, depguard, wrapcheck]
+  settings:
+    govet: { enable-all: true, disable: [fieldalignment] }
+    errcheck: { check-type-assertions: true, check-blank: true }
+    exhaustive: { default-signifies-exhaustive: true }
+    nolintlint: { require-explanation: true, require-specific: true }
+    sloglint: { no-mixed-args: true }
+    revive:
+      rules:
+        - { name: package-comments }
+        - { name: blank-imports }
+        - { name: context-as-argument }
+        - { name: context-keys-type }
+        - { name: dot-imports }
+        - { name: error-return }
+        - { name: error-strings }
+        - { name: error-naming }
+        - { name: if-return }
+        - { name: increment-decrement }
+        - { name: var-naming }
+        - { name: var-declaration }
+        - { name: range }
+        - { name: receiver-naming }
+        - { name: time-naming }
+        - { name: unexported-return }
+        - { name: indent-error-flow }
+        - { name: errorf }
+        - { name: empty-block }
+        - { name: superfluous-else }
+        - { name: unused-parameter }
+        - { name: unreachable-code }
+        - { name: redefines-builtin-id }
+    forbidigo:
+      forbid:
+        - { pattern: '^(fmt\.Print.*|print|println)$', msg: 'use log/slog (D-48)' }
+        - { pattern: '^log\.(Print|Fatal|Panic).*$', msg: 'use log/slog (D-48)' }
+    depguard:
+      rules:
+        gio-only-in-gui:
+          files: ['$all', '!**/gui/**', '!**/cmd/edgesync/**', '!**/spikes/**']
+          deny: [{ pkg: gioui.org, desc: 'Gio is used only by the GUI (D-33, D-55)' }]
+        no-os-backends-in-core:
+          files: ['**/internal/**', '!**/internal/platform/**', '!**/internal/service/**']
+          deny:
+            - { pkg: github.com/kikz0r/edgesync/internal/platform/windows, desc: 'use internal/platform interfaces (D-55)' }
+            - { pkg: github.com/kikz0r/edgesync/internal/platform/darwin, desc: 'use internal/platform interfaces (D-55)' }
+            - { pkg: github.com/kikz0r/edgesync/internal/platform/x11, desc: 'use internal/platform interfaces (D-55)' }
+            - { pkg: github.com/kikz0r/edgesync/internal/platform/wayland, desc: 'use internal/platform interfaces (D-55)' }
+            - { pkg: github.com/kikz0r/edgesync/internal/platform/linux, desc: 'use internal/platform interfaces (D-55)' }
+        capnp-boundary:
+          files: ['$all', '!**/internal/proto/**', '!**/internal/session/**', '!**/internal/ipc/**', '!**/internal/service/**', '!**/tools/capnpgen/**']
+          deny: [{ pkg: github.com/kikz0r/edgesync/internal/proto/capnp, desc: 'generated capnp types stay behind proto/session/ipc/service (D-55)' }]
+  exclusions:
+    generated: strict
+    presets: [std-error-handling]
+    rules:
+      - { path: '_test\.go', linters: [wrapcheck, gosec] }
+formatters:
+  enable: [gofumpt, goimports]
+  settings:
+    gofumpt: { extra-rules: true }
+    goimports: { local-prefixes: [github.com/kikz0r/edgesync] }
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
