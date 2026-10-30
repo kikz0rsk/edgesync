@@ -284,7 +284,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests (integration, CI): TestPasteboard_ChangeCountPolling, TestProvider_LazyTextHTMLRTFPNG (write provider-backed item, read back in-process, provider called once per type), TestConcealedType_Detected, TestPromise_ProviderRegistersAndWritesFile (promise delegate writes to a temp dir when fulfilled programmatically)
   DoD: spike gates green; README states plainly which behaviours remain unverifiable without a Mac (Finder paste of promises); commit `spike(macos): lazy pasteboard and file promises [FEAT-177]`
 
-- [ ] [P0-SP4-005] NSStatusItem tray, overlay panel and minimal .app bundle [FEAT-177, FEAT-059, FEAT-060, FEAT-164] [tier:sonnet why:AppKit run-loop ownership from a Go program via purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-005]
+- [x] [P0-SP4-005] NSStatusItem tray, overlay panel and minimal .app bundle [FEAT-177, FEAT-059, FEAT-060, FEAT-164] [tier:sonnet why:AppKit run-loop ownership from a Go program via purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-005]
   Needs: P0-SP4-001
   Files: spikes/macos/ui/app_darwin.go, spikes/macos/ui/statusitem_darwin.go, spikes/macos/ui/overlay_darwin.go, spikes/macos/cmd/trayoverlay/main.go, spikes/macos/bundle/Info.plist, spikes/macos/bundle/make-bundle.sh
   Tests (CI): bundle built and ad-hoc signed (`codesign -s - --force`), launched for 5 s, process alive, no crash report, `screencapture` artifact uploaded showing the status item and overlay
@@ -313,6 +313,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: spikes/macos/tap/README.md
   Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/tap`), run command with every flag of `cmd/tap` (read from its source), what to observe (TCC state line, tap created, counters, re-enable path), what to paste back, and the evidence level (compile-checked only, never run by the author)
   DoD: content derived only from the existing code and the P0-SP4-002 report; commit `docs(spikes): macOS event tap README [FEAT-177]`
+
+- [ ] [P0-SP4-009] README for the macOS tray, overlay and bundle spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-009]
+  Needs: P0-SP4-005
+  Files: spikes/macos/ui/README.md
+  Tests: the README names the exact build commands (`bash spikes/macos/bundle/make-bundle.sh`, and the per-arch `GOOS=darwin ... go -C spikes build ./macos/cmd/trayoverlay`), run commands with every flag of `cmd/trayoverlay` (read from its source), what to observe (status item "ES", menu actions, overlay above normal and full-screen spaces, clean exit), what to paste back, the "second-source" constant list copied from the doc comments in `spikes/macos/ui`, the open question "is NSFloatingWindowLevel enough above full-screen spaces (fallback NSStatusWindowLevel = 25)", and the evidence level (compile-checked only, never run by the author)
+  DoD: content derived only from the existing code and the P0-SP4-005 report; commit `docs(spikes): macOS tray and overlay README [FEAT-177]`
 
 ### SP5 - Core tech (Gio editor, QUIC, mDNS, Cap'n Proto, SPAKE2, IPC)
 

@@ -76,3 +76,9 @@ User-owned. Results (run URL, logs, screenshots) into `qa/manual/results/p0-sp4-
 did not include one. Write it from the code in `spikes/macos/tap` and `spikes/macos/cmd/tap` and from the P0-SP4-002 report: purpose, exact
 build command, exact run commands with every flag read from `cmd/tap/main.go`, what to observe, what to paste back, evidence level. Match the
 shape of `spikes/macos/README.md`. Do not edit any Go file.
+
+## Item P0-SP4-009
+`spikes/macos/ui/README.md`. Same purpose and shape as P0-SP4-008 for the code merged by P0-SP4-005: `spikes/macos/ui`, `spikes/macos/cmd/trayoverlay`
+and `spikes/macos/bundle` (Info.plist, make-bundle.sh). Read the code and the P0-SP4-005 report (second-source constants are listed in doc comments in
+`spikes/macos/ui`; the open question is whether NSFloatingWindowLevel suffices above full-screen spaces, fallback NSStatusWindowLevel = 25). Do not edit
+any other file.
