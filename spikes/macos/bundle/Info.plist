@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!--
+  Keys verified against Apple's Information Property List documentation (developer.apple.com, 2026-10-30):
+  LSUIElement, LSMinimumSystemVersion, NSPrincipalClass, NSLocalNetworkUsageDescription, NSBonjourServices,
+  NSDownloadsFolderUsageDescription, NSDesktopFolderUsageDescription, NSDocumentsFolderUsageDescription exist.
+  NSAccessibilityUsageDescription has no page in Apple's documentation (404), so it is not declared here.
+-->
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>en</string>
+	<key>CFBundleExecutable</key>
+	<string>trayoverlay</string>
+	<key>CFBundleIdentifier</key>
+	<string>io.github.kikz0r.edgesync.spike</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>EdgeSyncSpike</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.0.1</string>
+	<key>CFBundleVersion</key>
+	<string>1</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_edgesync._udp</string>
+	</array>
+	<key>NSDesktopFolderUsageDescription</key>
+	<string>EdgeSync Spike checks whether folder access prompts are tied to its bundle identity.</string>
+	<key>NSDocumentsFolderUsageDescription</key>
+	<string>EdgeSync Spike checks whether folder access prompts are tied to its bundle identity.</string>
+	<key>NSDownloadsFolderUsageDescription</key>
+	<string>EdgeSync Spike checks whether folder access prompts are tied to its bundle identity.</string>
+	<key>NSHighResolutionCapable</key>
+	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>EdgeSync Spike checks whether local network access prompts are tied to its bundle identity.</string>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
+</dict>
+</plist>
