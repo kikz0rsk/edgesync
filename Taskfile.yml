@@ -2,6 +2,7 @@ version: '3'
 
 vars:
   UCRT64: 'D:/Development/msys2/ucrt64/bin'
+  NULL_DEVICE: '{{if eq OS "windows"}}NUL{{else}}/dev/null{{end}}'
   CAPNP_DEFAULT: 'D:\Development\vcpkg\installed\x64-windows\tools\capnproto\capnp.exe'
   AGENT_PACKAGES:
     sh: for d in internal cmd/edgesync-agent; do if [ -d "$d" ]; then printf '%s ' "./$d/..."; fi; done
@@ -40,6 +41,33 @@ tasks:
     cmds:
       - '{{if .AGENT_PACKAGES}}GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build {{.AGENT_PACKAGES}}{{else}}echo "cross: no agent-side packages yet"{{end}}'
       - '{{if .AGENT_PACKAGES}}GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build {{.AGENT_PACKAGES}}{{else}}echo "cross: no agent-side packages yet"{{end}}'
+
+  spikes:cross:
+    desc: Build and vet every spike package for linux/amd64 and darwin/arm64 (gioeditor excluded)
+    cmds:
+      - task: spikes:cross:target
+        vars:
+          GOOS: linux
+          GOARCH: amd64
+      - task: spikes:cross:target
+        vars:
+          GOOS: darwin
+          GOARCH: arm64
+
+  spikes:cross:target:
+    internal: true
+    vars:
+      PACKAGES:
+        sh: GOOS={{.GOOS}} GOARCH={{.GOARCH}} CGO_ENABLED=0 go -C spikes list -e -f '{{"{{"}}if and .GoFiles (ne .ImportPath "github.com/kikz0r/edgesync/spikes/gioeditor"){{"}}"}}{{"{{"}}.ImportPath{{"}}"}}{{"{{"}}end{{"}}"}}' ./...
+    cmds:
+      - for:
+          var: PACKAGES
+          split: "\n"
+        cmd: GOOS={{.GOOS}} GOARCH={{.GOARCH}} CGO_ENABLED=0 go -C spikes build -o {{.NULL_DEVICE}} {{.ITEM}}
+      - for:
+          var: PACKAGES
+          split: "\n"
+        cmd: GOOS={{.GOOS}} GOARCH={{.GOARCH}} CGO_ENABLED=0 go -C spikes vet {{.ITEM}}
 
   test:
     desc: Run unit tests
