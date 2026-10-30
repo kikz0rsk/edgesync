@@ -26,6 +26,7 @@ require (
 	github.com/ebitengine/purego v0.11.2
 	github.com/godbus/dbus/v5 v5.2.4
 	github.com/hashicorp/mdns v1.0.7
+	github.com/jezek/xgb v1.3.1
 	github.com/quic-go/quic-go v0.64.1
 	golang.org/x/sys v0.49.0
 )

@@ -210,7 +210,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate on GNOME (user run): RequestClipboard on a RemoteDesktop session and on an InputCapture session (record which works); SetSelection with text/plain;charset=utf-8, text/html, image/png, text/uri-list, x-special/gnome-copied-files; SelectionTransfer served after a configurable delay with paste behaviour in Text Editor and Nautilus; SelectionOwnerChanged + SelectionRead of each MIME for a local copy; whether clipboard access stops when the session is inactive
   DoD: spike gates green incl. `GOOS=linux` vet; commit `spike(linux): portal clipboard [FEAT-177]`
 
-- [ ] [P0-SP3-004] X11 spike with jezek/xgb: grab, deltas, XTest, RandR, XFixes, INCR [FEAT-177, FEAT-063, FEAT-064, FEAT-065, FEAT-067] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-004]
+- [x] [P0-SP3-004] X11 spike with jezek/xgb: grab, deltas, XTest, RandR, XFixes, INCR [FEAT-177, FEAT-063, FEAT-064, FEAT-065, FEAT-067] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-004]
   Needs: P0-F-005
   Files: spikes/linux/x11/conn.go, spikes/linux/x11/grab.go, spikes/linux/x11/inject.go, spikes/linux/x11/randr.go, spikes/linux/x11/selection.go, spikes/linux/x11/x11_integration_test.go, spikes/linux/cmd/x11demo/main.go, spikes/linux/x11/README.md
   <!-- NOTE: 2026-10-30 - Files extended by spikes/linux/x11/x11_test.go (host unit tests, no X server, of the pure logic: INCR sender and receiver state machines, chunk sizing, atom encoding, monitor-edge helpers). The agent skipped them only because the Files line omitted them. -->
