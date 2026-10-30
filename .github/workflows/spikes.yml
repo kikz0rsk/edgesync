@@ -30,6 +30,93 @@ jobs:
       - run: go -C spikes vet ./...
       - run: go -C spikes build ./...
       - run: go -C spikes test -tags integration ./...
+        continue-on-error: true
+      - name: Record environment
+        run: |
+          mkdir -p spikes/out
+          {
+            sw_vers
+            echo "arch: $(uname -m)"
+            echo "launchd manager: $(launchctl managername)"
+            echo "console user: $(stat -f%Su /dev/console)"
+          } > spikes/out/environment.txt 2>&1
+          cat spikes/out/environment.txt
+      - name: macOS integration tests with log
+        id: macos_tests
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          mkdir -p spikes/out
+          go -C spikes test -tags integration -v ./macos/... 2>&1 | tee spikes/out/macos-tests.log
+      - name: Build spike binaries
+        id: build_spikes
+        continue-on-error: true
+        env:
+          CGO_ENABLED: '0'
+        run: |
+          mkdir -p spikes/bin
+          go -C spikes build -o bin/displays ./macos/cmd/displays
+          go -C spikes build -o bin/pb ./macos/cmd/pb
+      - name: Display status
+        if: steps.build_spikes.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          spikes/bin/displays 2>&1 | tee spikes/out/displays.txt
+      - name: Pasteboard status
+        if: steps.build_spikes.outcome == 'success'
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          spikes/bin/pb -mode status 2>&1 | tee spikes/out/pb-status.txt
+      - name: Build EdgeSyncSpike bundle
+        id: bundle
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          bash spikes/macos/bundle/make-bundle.sh 2>&1 | tee spikes/out/bundle-build.txt
+      - name: Launch bundle for 5 s
+        if: steps.bundle.outcome == 'success'
+        continue-on-error: true
+        run: |
+          out="$PWD/spikes/out"
+          open --stdout "$out/trayoverlay.stdout.log" --stderr "$out/trayoverlay.stderr.log" -a "$out/EdgeSyncSpike.app" --args -selftest 5s
+          sleep 2
+      - name: Capture screen mid-run
+        if: steps.bundle.outcome == 'success'
+        continue-on-error: true
+        run: screencapture -x "$PWD/spikes/out/screen.png"
+      - name: Wait for the bundle to exit
+        if: steps.bundle.outcome == 'success'
+        continue-on-error: true
+        run: |
+          for _ in $(seq 1 30); do
+            pgrep -x trayoverlay > /dev/null || break
+            sleep 1
+          done
+          if pgrep -lx trayoverlay > spikes/out/still-running.txt; then
+            cat spikes/out/still-running.txt
+          else
+            echo "trayoverlay not running after wait" > spikes/out/still-running.txt
+          fi
+      - name: Collect crash reports
+        if: always()
+        run: |
+          reports="$HOME/Library/Logs/DiagnosticReports"
+          mkdir -p spikes/out/crash-reports
+          if [ -d "$reports" ]; then
+            find "$reports" -maxdepth 1 \( -name 'trayoverlay*' -o -name 'EdgeSync*' \) -exec cp {} spikes/out/crash-reports/ \;
+          fi
+          ls -la spikes/out/crash-reports > spikes/out/crash-reports/listing.txt
+      - name: Summarize macOS outcomes
+        if: always()
+        run: |
+          {
+            echo "### macOS spike outcomes"
+            echo "- integration tests: ${{ steps.macos_tests.outcome }}"
+            echo "- spike binaries: ${{ steps.build_spikes.outcome }}"
+            echo "- bundle build: ${{ steps.bundle.outcome }}"
+          } >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@v7.0.2
         if: always()
         with:
