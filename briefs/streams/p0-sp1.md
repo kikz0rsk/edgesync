@@ -90,3 +90,9 @@ also has untagged pure logic (`edges.go`, `edges_test.go`) that must keep buildi
 `main` on non-Windows; add `spikes/wininject/main_other.go` (`//go:build !windows`) with `package main` and a `main` that writes "windows only" to stderr
 and exits 2. `wincursor` has only Windows files besides `main.go`, so tagging is enough. Verify per package with `go build -o NUL` and `go vet` for
 GOOS=linux and GOOS=darwin (CGO_ENABLED=0), and confirm the windows build and tests are unchanged.
+
+## Item P0-SP1-012
+`spikes/winsvc/helper` has untagged pure logic (`geometry.go`, `geometry_test.go`, which must keep running on every OS) and a windows-tagged `main.go`, so on linux and
+macOS the package is a `package main` without `main` (found by the whole-package cross build while merging P0-SP1-004). Add `spikes/winsvc/helper/main_other.go`
+(`//go:build !windows`, `package main`) with a `main` that writes "windows only" to stderr and exits 2. Do not touch any other file. `spikes/winsvc/service` has only
+windows-tagged files and needs nothing.

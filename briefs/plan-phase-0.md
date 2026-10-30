@@ -115,9 +115,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate for strategies (a) ClipCursor 1x1 + SetCursorPos, (b) 1x1 topmost window + SetCapture, (c) transparent cursor on a fullscreen layered window: cursor invisible over normal apps, over a fullscreen video, over Task Manager (elevated), restoration after normal exit and after `taskkill /F`
   DoD: spike gates green; strategy (c) never uses `SetSystemCursor`; commit `spike(win): cursor hide and park strategies [FEAT-177]`
 
-- [ ] [P0-SP1-004] SYSTEM service, secure helper, desktop following, UIPI and SendSAS spike [FEAT-177, FEAT-044, FEAT-045, FEAT-046, FEAT-048, FEAT-049] [tier:sonnet why:token duplication, session and desktop security semantics] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-004]
+- [x] [P0-SP1-004] SYSTEM service, secure helper, desktop following, UIPI and SendSAS spike [FEAT-177, FEAT-044, FEAT-045, FEAT-046, FEAT-048, FEAT-049] [tier:sonnet why:token duplication, session and desktop security semantics] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-004]
   Needs: P0-F-005
   Files: spikes/winsvc/service/main.go, spikes/winsvc/service/session_windows.go, spikes/winsvc/service/launch_windows.go, spikes/winsvc/service/sas_windows.go, spikes/winsvc/helper/main.go, spikes/winsvc/helper/desktop_windows.go, spikes/winsvc/helper/inject_windows.go, spikes/winsvc/install.ps1, spikes/winsvc/uninstall.ps1, spikes/winsvc/README.md
+  <!-- NOTE: 2026-10-30 - Files extended (approved, same tree): spikes/winsvc/internal/proto/{proto.go,proto_test.go,sddl_windows_test.go}, spikes/winsvc/internal/supervise/{supervise.go,supervise_test.go} and spikes/winsvc/helper/{geometry.go,geometry_test.go} (pure logic shared by both binaries and its host tests; the Files line named only the entry points, scripts and README). -->
   Tests: spike must demonstrate (user run, admin for install): helper launched into the active console session with a winlogon-derived token + TokenUIAccess; helper logs input-desktop switches (Default, Winlogon, Screen-saver) within 200 ms; injected mouse square + typed text land in an elevated Task Manager, on a UAC prompt (Escape cancels it), on the lock screen (moves pointer, shows the password field); `SoftwareSASGeneration` value read and logged; SendSAS opens the Ctrl+Alt+Del screen; after reboot with nobody logged on, the helper runs at the sign-in screen and injects movement; service restarts the helper after `taskkill /F`
   DoD: spike gates green; install/uninstall scripts idempotent and require admin; all logs to `%ProgramData%\EdgeSyncSpike\`; commit `spike(win): service, secure helper and SendSAS [FEAT-177]`
 
@@ -150,6 +151,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: spikes/wininject/main.go, spikes/wininject/main_other.go, spikes/wincursor/main.go
   Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL` and `go vet` of ./wininject and ./wincursor both succeed; on windows `go -C spikes vet ./...`, `go -C spikes test ./wininject/...` and the build of both commands still succeed with identical behaviour
   DoD: `wininject/main.go` and `wincursor/main.go` start with `//go:build windows`; `wininject/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2, because wininject has untagged pure logic (edges.go) that must keep building and testing on every OS; commit `fix(spikes): tag windows-only spike mains [FEAT-177]`
+
+- [ ] [P0-SP1-012] winsvc helper builds on linux and darwin [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-012]
+  Needs: P0-SP1-004, P0-SP1-011
+  Files: spikes/winsvc/helper/main_other.go
+  Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL ./winsvc/helper` and `go vet ./winsvc/helper` succeed; `go -C spikes test ./winsvc/...` still passes on windows (geometry tests) and on linux
+  DoD: `winsvc/helper/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2; no other file changes; `task spikes:cross` (P0-F-013) exits 0 afterwards; commit `fix(spikes): winsvc helper builds on non-windows [FEAT-177]`
 
 ### SP2 - Windows COM shell (virtual files, delayed rendering, OLE drag-and-drop)
 
