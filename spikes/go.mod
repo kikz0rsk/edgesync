@@ -4,6 +4,7 @@ go 1.27
 
 require (
 	gioui.org/shader v1.0.9 // indirect
+	github.com/colega/zeropool v0.0.0-20230505084239-6fb4a4f75381 // indirect
 	github.com/go-text/typesetting v0.3.5 // indirect
 	github.com/miekg/dns v1.1.72 // indirect
 	github.com/vishvananda/netlink v1.2.1-beta.2 // indirect
@@ -19,6 +20,7 @@ require (
 )
 
 require (
+	capnproto.org/go/capnp/v3 v3.1.0-alpha.2
 	gioui.org v0.10.3
 	github.com/brutella/dnssd v1.2.14
 	github.com/ebitengine/purego v0.11.2
