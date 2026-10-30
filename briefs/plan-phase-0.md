@@ -213,6 +213,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 - [ ] [P0-SP3-004] X11 spike with jezek/xgb: grab, deltas, XTest, RandR, XFixes, INCR [FEAT-177, FEAT-063, FEAT-064, FEAT-065, FEAT-067] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-004]
   Needs: P0-F-005
   Files: spikes/linux/x11/conn.go, spikes/linux/x11/grab.go, spikes/linux/x11/inject.go, spikes/linux/x11/randr.go, spikes/linux/x11/selection.go, spikes/linux/x11/x11_integration_test.go, spikes/linux/cmd/x11demo/main.go, spikes/linux/x11/README.md
+  <!-- NOTE: 2026-10-30 - Files extended by spikes/linux/x11/x11_test.go (host unit tests, no X server, of the pure logic: INCR sender and receiver state machines, chunk sizing, atom encoding, monitor-edge helpers). The agent skipped them only because the Files line omitted them. -->
   Tests (integration, Xvfb `:99` with two RandR monitors set via `xrandr --setmonitor`): TestXTest_MotionObservedByOwnWindow, TestGrab_WarpToCentreDeltas, TestXFixes_SelectionNotifyOnForeignOwner, TestSelection_INCRTransfer5MiB, TestRandR_MonitorsListed
   DoD: spike gates green incl. `GOOS=linux` vet; uses github.com/jezek/xgb v1.3.1; commit `spike(linux): X11 capture, injection and selections [FEAT-177]`
 
