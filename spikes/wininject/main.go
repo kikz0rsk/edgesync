@@ -1,3 +1,5 @@
+//go:build windows
+
 // Command wininject measures Windows injection on the controlled machine: it reports the monitor topology, per-monitor
 // DPI and the real edges (D-51, D-89), moves the pointer with absolute SendInput to every monitor probe and reads the
 // position back, types a scancode pattern including extended keys, and injects wheel and X-button events. Run by the
