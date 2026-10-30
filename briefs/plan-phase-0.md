@@ -186,9 +186,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate (user run): dragging files from Explorer onto a 2 px transparent topmost window on the primary monitor's right edge fires DragEnter and the spike prints CF_HDROP paths and the FILEGROUPDESCRIPTORW entries; the edge window is click-through when no drag is active; pressing the left button on the spike's source window starts DoDragDrop with the SP2-002 virtual-file IDataObject and dropping on an Explorer folder and on the desktop materialises the files; behaviour when Explorer is elevated (UIPI) recorded
   DoD: spike gates green; commit `spike(win): OLE drag-and-drop edge target and source [FEAT-177]`
 
-- [ ] [P0-SP2-005] Gio window HWND file-drop spike [FEAT-177, FEAT-106] [tier:haiku] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-005]
+- [x] [P0-SP2-005] Gio window HWND file-drop spike [FEAT-177, FEAT-106] [tier:haiku] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-005]
   Needs: P0-SP2-001
   Files: spikes/giodrop/main.go, spikes/giodrop/drop_windows.go, spikes/giodrop/README.md
+  <!-- NOTE: 2026-10-30 - Files extended (approved): spikes/giodrop/drop_windows_test.go (9 host tests: DROPFILES layout, wide/ANSI/malformed lists, path normalisation, effect negotiation, dp conversion, drop model, IDropTarget through the wincom vtables) and spikes/giodrop/main_other.go (!windows main, required by the cross-OS build gate). -->
   Tests: spike must demonstrate (user run): HWND obtained from Gio's Win32 view event; IDropTarget registered on Gio's window thread; dropped paths and the drop point converted to Gio coordinates are shown in the window; no conflict with Gio's own OLE/COM initialisation
   DoD: spike gates green with `CGO_ENABLED=0`; commit `spike(gui): native file drop onto a Gio window on Windows [FEAT-177]`
 
