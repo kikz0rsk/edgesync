@@ -1,3 +1,5 @@
+//go:build windows
+
 // Command wincursor compares three ways to keep the local pointer still and hidden while input suppression is on
 // (FEAT-034, D-50): ClipCursor confinement to a 1x1 rectangle, a 1x1 captured window with a transparent cursor class,
 // and per-monitor layered windows with a transparent cursor set in WM_SETCURSOR. Suppression itself is the
