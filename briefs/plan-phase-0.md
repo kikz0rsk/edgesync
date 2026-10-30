@@ -354,7 +354,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestRoundTrip_Hello, TestRoundTrip_ClipAnnounce, TestLimits_TraversalBombRejected, TestLimits_DepthLimitRejected, TestLimits_OversizedMessageRejected, FuzzDecodeHello (30 s), BenchmarkEncodeHello/BenchmarkDecodeClipAnnounce (allocs/op reported)
   DoD: spike gates green; exact generation command recorded; commit `spike(proto): Cap'n Proto toolchain and limits [FEAT-177]`
 
-- [ ] [P0-SP5-005] SPAKE2 (RFC 9382, P-256) feasibility with official test vectors and TLS exporter binding [FEAT-177, FEAT-126, FEAT-127] [tier:sonnet why:cryptographic protocol implementation from RFC 9382 incl. M/N constants and key schedule] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-005]
+- [x] [P0-SP5-005] SPAKE2 (RFC 9382, P-256) feasibility with official test vectors and TLS exporter binding [FEAT-177, FEAT-126, FEAT-127] [tier:sonnet why:cryptographic protocol implementation from RFC 9382 incl. M/N constants and key schedule] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-005]
   Needs: P0-F-005
   Files: spikes/spake2/spake2.go, spikes/spake2/spake2_test.go, spikes/spake2/exporter_test.go, spikes/spake2/bench_test.go, spikes/spake2/README.md
   Tests: TestRFC9382_VectorsP256SHA256 (every vector in RFC 9382 Appendix B for P-256 reproduced byte for byte), TestSPAKE2_WrongPasswordFailsConfirmation, TestSPAKE2_RejectsIdentityAndOffCurvePoints, TestExporter_BindingDiffersPerConnection (TLS 1.3 loopback), BenchmarkSPAKE2Full
