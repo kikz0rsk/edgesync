@@ -23,6 +23,7 @@ require (
 	capnproto.org/go/capnp/v3 v3.1.0-alpha.2
 	filippo.io/nistec v0.0.4
 	gioui.org v0.10.3
+	github.com/Microsoft/go-winio v0.6.4
 	github.com/brutella/dnssd v1.2.14
 	github.com/ebitengine/purego v0.11.2
 	github.com/godbus/dbus/v5 v5.2.4
