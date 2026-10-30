@@ -63,13 +63,13 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestParseProfile_SetAndAtomicModes, TestPerPackageCoverage_MergesDuplicateBlocks, TestCheck_FailsBelowMinimum, TestCheck_FailsWhenIncludedPackageHasNoProfile, TestCheck_ExcludedPatternsIgnored, TestCLI_ExitCodes
   DoD: CLI `go run ./tools/covercheck -profile coverage.out -min 85 -exclude tools/coverage-exclude.txt -packages "<go list output file>"` prints a per-package table and exits 1 on any violation; coverage of tools/covercheck >= 85%; exclude file lists `internal/platform/windows/...`, `internal/platform/darwin/...`, `internal/platform/x11/...`, `internal/platform/wayland/...`, `internal/platform/linux/...`, `internal/platform/host/...`, `internal/service/...`, `cmd/...`, `gui/...` (GUI policy is revisited in P3-F by a new decision); per-item gates green; commit `build(cover): per-package coverage gate [FEAT-169]`
 
-- [ ] [P0-F-009] Taskfile with every gate + fuzz smoke runner [FEAT-169, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-009]
+- [x] [P0-F-009] Taskfile with every gate + fuzz smoke runner [FEAT-169, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-009]
   Needs: P0-F-006, P0-F-007, P0-F-008
   Files: Taskfile.yml, tools/fuzzsmoke/main.go, tools/fuzzsmoke/fuzzsmoke.go, tools/fuzzsmoke/fuzzsmoke_test.go
   Tests: TestParseListOutput_MultiplePackages, TestParseListOutput_NoFuzzTargets, TestCommandsFor_TargetsAndDuration; `task --list` shows fmt, lint, lint:cross, vet, build, cross, test, test:race, cover, fuzz:smoke, vuln, actionlint, gen, gen:check, ci:local; `task ci:local` exits 0 on the current tree
   DoD: commands exactly as in the brief (race uses ucrt64 gcc on PATH, cross uses CGO_ENABLED=0, `gen` = `go generate ./...`, `gen:check` = gen + `git diff --exit-code`); coverage of tools/fuzzsmoke >= 85%; commit `build(task): Taskfile with all quality gates [FEAT-169]`
 
-- [ ] [P0-F-010] CI workflow ci.yml [FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-010]
+- [x] [P0-F-010] CI workflow ci.yml [FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-010]
   Needs: P0-F-009
   Files: .github/workflows/ci.yml
   Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0 for all workflows; jobs present: `lint` (ubuntu-24.04, golangci-lint-action pinned v2.15.0, plus `GOOS=windows` and `GOOS=darwin` lint runs over agent-side packages), `test` (matrix windows-latest, macos-latest, ubuntu-24.04: setup-go 1.27.3, go-task setup, `task build test test:race cover`), `cross` (ubuntu-24.04: `task cross`), `gen-check` (ubuntu-24.04: apt `capnproto`, `task gen:check`), `vuln` (`task vuln`), `actionlint`
@@ -77,7 +77,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 <!-- NOTE: 2026-10-30 - D-121 removed the clipboard sensitivity skip (concealed content is shared). The sensitivity-format observations in SP2 and SP4 stay informational: they are not go/no-go criteria and nothing in P1-P5 depends on them. the WiX toolchain item P0-F-003 is superseded by the Inno Setup install of the same ID (D-118). -->
 
-- [ ] [P0-F-011] Replace the deprecated gofumpt extra-rules key (D-122) [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-011]
+- [x] [P0-F-011] Replace the deprecated gofumpt extra-rules key (D-122) [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-011]
   Needs: P0-F-007
   Files: .golangci.yml
   Tests: `golangci-lint config verify` exits 0; `golangci-lint run ./...` exits 0 and prints no `extra-rules` deprecation warning; `golangci-lint fmt --diff ./...` prints no diff
