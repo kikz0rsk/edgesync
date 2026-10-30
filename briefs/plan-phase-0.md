@@ -203,7 +203,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestRequest_HandleTokenPathDerivation, TestRequest_ResponseDecoding (host); spike must demonstrate on GNOME (user run): portal interface versions; zones printed; barrier on the right edge activates capture; relative motion, buttons, keys and scroll arrive over EI; Release(activation_id, cursor_position) returns the pointer; session recreation after a barrier change; restore token persisted and reused (second run without dialog if the backend supports it); injection of a pointer square + typed text via RemoteDesktop + EI
   DoD: spike gates green incl. `GOOS=linux` vet; uses github.com/godbus/dbus/v5 v5.2.4; commit `spike(linux): InputCapture and RemoteDesktop portals [FEAT-177]`
 
-- [ ] [P0-SP3-003] Portal clipboard spike [FEAT-177, FEAT-078] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-003]
+- [x] [P0-SP3-003] Portal clipboard spike [FEAT-177, FEAT-078] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-003]
   Needs: P0-SP3-002
   Files: spikes/linux/portal/clipboard.go, spikes/linux/cmd/wlclip/main.go, spikes/linux/cmd/wlclip/README.md
   <!-- NOTE: 2026-10-30 - Files extended by spikes/linux/portal/clipboard_test.go (host tests of the clipboard portal flow against the fake bus, as P0-SP3-002 did for its portal code; the agent had kept them outside the repo only because the Files line omitted them). -->
