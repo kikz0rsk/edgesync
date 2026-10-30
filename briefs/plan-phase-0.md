@@ -16,13 +16,13 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### P0-F - Foundation block (sequential, 1 agent, in order)
 
-- [ ] [P0-F-001] Install golangci-lint v2.15.0 from the official release binary [FEAT-169] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-001]
+- [x] [P0-F-001] Install golangci-lint v2.15.0 from the official release binary [FEAT-169] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-001]
   Needs: user approval in chat
   Files: qa/manual/results/p0-f-toolchain.md (created; records version output, install path, checksum)
   Tests: SHA-256 of `golangci-lint-2.15.0-windows-amd64.zip` equals the line in `golangci-lint-2.15.0-checksums.txt`; `golangci-lint version` prints `2.15.0` in Git Bash and PowerShell
   DoD: binary at `%USERPROFILE%\go\bin\golangci-lint.exe` and resolvable on PATH (if that directory is not on PATH: BLOCKED, do not edit PATH); results file committed `build(toolchain): install golangci-lint v2.15.0 [FEAT-169]`
 
-- [ ] [P0-F-002] Install the Cap'n Proto compiler 1.4.0 via vcpkg [FEAT-169, FEAT-120] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-002]
+- [x] [P0-F-002] Install the Cap'n Proto compiler 1.4.0 via vcpkg [FEAT-169, FEAT-120] [tier:haiku] [owner:USER-CONFIRM] [brief:briefs/streams/p0-f.md#item-p0-f-002]
   Needs: user approval in chat
   Files: qa/manual/results/p0-f-toolchain.md (append section)
   Tests: vswhere reports an MSVC x64 toolset (else BLOCKED with the exact missing component); `D:\Development\vcpkg\vcpkg.exe install capnproto:x64-windows` succeeds; `capnp --version` prints `Cap'n Proto version 1.4.0`
