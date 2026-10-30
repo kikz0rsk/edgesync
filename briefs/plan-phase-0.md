@@ -277,7 +277,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestInject_MoveClickKeyScroll (integration, CI): posts move with delta fields, click with click state and event number fields, key down/up with keycode and modifier flags, scroll via `CGEventCreateScrollWheelEvent2` (non-variadic); verifies via cursor position read-back and, when trusted, a listen-only tap
   DoD: spike gates green; commit `spike(macos): event injection [FEAT-177]`
 
-- [ ] [P0-SP4-004] Lazy pasteboard provider and file promises via purego objc [FEAT-177, FEAT-057, FEAT-107] [tier:sonnet why:Objective-C class registration implementing NSPasteboardItemDataProvider and NSFilePromiseProviderDelegate via purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-004]
+- [x] [P0-SP4-004] Lazy pasteboard provider and file promises via purego objc [FEAT-177, FEAT-057, FEAT-107] [tier:sonnet why:Objective-C class registration implementing NSPasteboardItemDataProvider and NSFilePromiseProviderDelegate via purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-004]
   Needs: P0-SP4-001
   Files: spikes/macos/pb/pasteboard_darwin.go, spikes/macos/pb/provider_darwin.go, spikes/macos/pb/promise_darwin.go, spikes/macos/pb/pb_integration_test.go, spikes/macos/cmd/pb/main.go
   Tests (integration, CI): TestPasteboard_ChangeCountPolling, TestProvider_LazyTextHTMLRTFPNG (write provider-backed item, read back in-process, provider called once per type), TestConcealedType_Detected, TestPromise_ProviderRegistersAndWritesFile (promise delegate writes to a temp dir when fulfilled programmatically)
