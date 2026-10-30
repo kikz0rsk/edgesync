@@ -271,7 +271,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestTap_CreateSessionTapReportsTrustState (integration, CI): logs `AXIsProcessTrusted`, `CGPreflightListenEventAccess`, `CGPreflightPostEventAccess`, whether an active session tap and a listen-only tap can be created; when created, synthetic events posted by the test are observed and timeout re-enable code path executes
   DoD: spike gates green; commit `spike(macos): event tap [FEAT-177]`
 
-- [ ] [P0-SP4-003] Event injection via CGEventPost [FEAT-177, FEAT-054] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-003]
+- [x] [P0-SP4-003] Event injection via CGEventPost [FEAT-177, FEAT-054] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-003]
   Needs: P0-SP4-001
   Files: spikes/macos/inject/inject_darwin.go, spikes/macos/inject/inject_integration_test.go, spikes/macos/cmd/inject/main.go
   Tests: TestInject_MoveClickKeyScroll (integration, CI): posts move with delta fields, click with click state and event number fields, key down/up with keycode and modifier flags, scroll via `CGEventCreateScrollWheelEvent2` (non-variadic); verifies via cursor position read-back and, when trusted, a listen-only tap
