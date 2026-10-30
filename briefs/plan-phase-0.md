@@ -245,7 +245,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests (integration, Xvfb `:99` with two RandR monitors set via `xrandr --setmonitor`): TestXTest_MotionObservedByOwnWindow, TestGrab_WarpToCentreDeltas, TestXFixes_SelectionNotifyOnForeignOwner, TestSelection_INCRTransfer5MiB, TestRandR_MonitorsListed
   DoD: spike gates green incl. `GOOS=linux` vet; uses github.com/jezek/xgb v1.3.1; commit `spike(linux): X11 capture, injection and selections [FEAT-177]`
 
-- [ ] [P0-SP3-005] XInput2/XKB binding generation assessment [FEAT-177, FEAT-063] [tier:sonnet why:code-generation feasibility assessment with xgbgen on xcb-proto] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-005]
+- [x] [P0-SP3-005] XInput2/XKB binding generation assessment [FEAT-177, FEAT-063] [tier:sonnet why:code-generation feasibility assessment with xgbgen on xcb-proto] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-005]
   Needs: P0-SP3-004
   Files: spikes/linux/x11gen/gen.sh, spikes/linux/x11gen/README.md, spikes/linux/x11gen/xinput/ (generated), spikes/linux/x11/xi2_integration_test.go
   Tests: generated package compiles with `GOOS=linux`; TestXI2_RawMotionOnXvfb (integration) receives XI_RawMotion while a grab is active, or the README records the exact generation failure

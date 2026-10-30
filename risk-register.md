@@ -69,3 +69,6 @@ Owner = the stream accountable for the mitigation (PARENT = orchestrator, USER =
 
 <!-- NOTE: 2026-10-30 - planning consolidation: R-07 is extended by R-53 (macOS permission flows cannot be exercised on CI or by the user; ad-hoc signatures reset TCC grants on every update, D-106, Q-06). R-15 is addressed by D-86 (types-only reads on change, data only on fetch). R-09 gains D-91 (KDE display-power events may be reported as unsupported). R-37 is open question Q-07. New risks R-52 .. R-57 come from D-84 .. D-104 and Q-03/Q-04. -->
 <!-- NOTE: 2026-10-30 - product answers: R-52 is active (Q-04 option A, D-115; availability detection and the `lockScreen` environment check are P2-M1-028 and P3-G5-021). R-56 is mitigated by D-114 (GlobalShortcuts portal for lock and panic at home, items P1-F-023, P1-C3-027, P2-Y1-026, P2-Y1-027, P3-G3-013; GNOME 45-47 support stays UNVERIFIED). R-14 and R-53 are accepted by Q-06 (D-117). R-37 now concerns the Inno Setup licence (D-118). New risks R-58 .. R-61 come from D-112, D-115, D-118 and D-121. -->
+
+<!-- NOTE: 2026-10-30 - R-16 mitigation amended by D-125: "Warp-to-centre deltas or generated XI2 per SP3-005" now reads "warp-to-centre plus RECORD (D-92), or hand-bound XI2 (D-125); xgbgen cannot generate working XI2/XKB bindings and xgb cannot receive XI2 generic events (P0-SP3-005)". -->
+
