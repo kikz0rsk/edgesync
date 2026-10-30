@@ -147,7 +147,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestHandles_AddGetRelease, TestHandles_ConcurrentAccess (host); TestCOM_QueryInterfaceAddRefRelease, TestCOM_EnumFormatEtcNextSkipReset, TestCOM_IStreamReadSeekStat (host, calls through the vtables in-process via syscall.SyscallN); callbacks created once per method (count asserted <= 64)
   DoD: spike gates green; commit `spike(win): pure-Go COM infrastructure [FEAT-177]`
 
-- [ ] [P0-SP2-002] Virtual-file clipboard spike (FILEGROUPDESCRIPTORW + FILECONTENTS IStream) [FEAT-177, FEAT-103] [tier:sonnet why:IDataObject GetData semantics and Explorer interaction for virtual files] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-002]
+- [x] [P0-SP2-002] Virtual-file clipboard spike (FILEGROUPDESCRIPTORW + FILECONTENTS IStream) [FEAT-177, FEAT-103] [tier:sonnet why:IDataObject GetData semantics and Explorer interaction for virtual files] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-002]
   Needs: P0-SP2-001
   Files: spikes/winvfiles/main.go, spikes/winvfiles/descriptor_windows.go, spikes/winvfiles/source.go, spikes/winvfiles/source_test.go, spikes/winvfiles/README.md
   Tests: TestSource_ThrottledReadRespectsRate, TestSource_SeekAndRange (host); spike must demonstrate (user run): Explorer paste of a folder + 200 MB file + small file from a throttled synthetic source; Explorer progress UI shows sizes; cancel in Explorer stops reads; log of every IDataObject call (format, lindex, tymed, aspect) incl. PERFORMEDDROPEFFECT/PASTESUCCEEDED; Explorer responsiveness while Read blocks 3 s; behaviour after the spike exits with and without OleFlushClipboard

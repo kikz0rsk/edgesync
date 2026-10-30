@@ -195,3 +195,5 @@ Never mark `[x]` on a subagent's word alone. When a subagent leaves churn (stray
 
 <!-- NOTE: 2026-10-30 - P0-SP4-003 merged. Evidence level for the CGEvent constants in spikes/macos/inject is second-source (servo core-graphics bindings, Chromium dom_code_data.inc): the Apple SDK header URLs were unreachable for the agent. The macOS CI integration tests are the real check; SP4-007 must list these as "second-source until CI confirms". -->
 
+<!-- NOTE: 2026-10-30 - P0-SP2-002 merged. Finding for P0-SP2-007 (findings) and P4-F1: wincom.DataSource hides the FORMATETC of QueryGetData / GetData requests for formats the object does not offer, so the spike logs a Formats line for those instead of per-call format/lindex/tymed/aspect; the contract may need widening before P4. Also: the descriptor builder rejects backslash in paths beyond the D-99 list (input paths are slash-separated). -->
+
