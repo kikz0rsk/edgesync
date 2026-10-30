@@ -25,3 +25,17 @@ Recorded by the orchestrator from user-performed installs and read-only verifica
   ```
 
 - PATH: `C:\Users\kikz0r\go\bin` is on the User PATH (registry). It is not on the Machine PATH. A fresh PowerShell session with Machine+User PATH reloaded resolves `golangci-lint` to `C:\Users\kikz0r\go\bin\golangci-lint.exe`. No PATH was edited.
+
+## Cap'n Proto 1.4.0 via vcpkg (P0-F-002) - 2026-10-30
+
+- MSVC check: `"${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -products * -latest -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath` returned `C:\Program Files\Microsoft Visual Studio\18\Community` (exit 0).
+- vcpkg port `D:\Development\vcpkg\ports\capnproto\vcpkg.json` declares version `1.4.0`.
+- Command: `D:\Development\vcpkg\vcpkg.exe install capnproto:x64-windows` (completed, "All requested installations completed successfully"; no retry needed).
+- Absolute path of `capnp.exe`: `D:\Development\vcpkg\installed\x64-windows\tools\capnproto\capnp.exe`
+- `capnp --version` output, verbatim:
+
+  ```
+  Cap'n Proto version 1.4.0
+  ```
+
+- Companion compilers beside it in the same directory: `capnpc-c++.exe`, `capnpc-capnp.exe`. Directory: `D:\Development\vcpkg\installed\x64-windows\tools\capnproto\`.
