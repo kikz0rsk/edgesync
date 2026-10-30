@@ -83,7 +83,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: `golangci-lint config verify` exits 0; `golangci-lint run ./...` exits 0 and prints no `extra-rules` deprecation warning; `golangci-lint fmt --diff ./...` prints no diff
   DoD: only the gofumpt setting changes, to `extra: { group-params: true, clothe-returns: true }`; commit `build(lint): use non-deprecated gofumpt extra keys [FEAT-169]`
 
-- [ ] [P0-F-012] spikes.yml linux job installs the Gio build dependencies [FEAT-177, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-012]
+- [x] [P0-F-012] spikes.yml linux job installs the Gio build dependencies [FEAT-177, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-012]
   Needs: P0-SP5-001
   Files: .github/workflows/spikes.yml
   Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0; the linux job has an apt-get install step that runs before `go -C spikes vet ./...` and installs every package Gio v0.10.3 documents for Ubuntu (package list verified at execution time against the Gio install documentation for v0.10.3, recorded in the commit body)
@@ -321,7 +321,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: the README names the exact build commands (`bash spikes/macos/bundle/make-bundle.sh`, and the per-arch `GOOS=darwin ... go -C spikes build ./macos/cmd/trayoverlay`), run commands with every flag of `cmd/trayoverlay` (read from its source), what to observe (status item "ES", menu actions, overlay above normal and full-screen spaces, clean exit), what to paste back, the "second-source" constant list copied from the doc comments in `spikes/macos/ui`, the open question "is NSFloatingWindowLevel enough above full-screen spaces (fallback NSStatusWindowLevel = 25)", and the evidence level (compile-checked only, never run by the author)
   DoD: content derived only from the existing code and the P0-SP4-005 report; commit `docs(spikes): macOS tray and overlay README [FEAT-177]`
 
-- [ ] [P0-SP4-010] README for the macOS event injection spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-010]
+- [x] [P0-SP4-010] README for the macOS event injection spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-010]
   Needs: P0-SP4-003
   Files: spikes/macos/inject/README.md
   Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/inject`), the run command with every flag of `cmd/inject` (read from its source), the permissions needed (Accessibility / Post Event access), what to observe, what to paste back, the "second-source" constant provenance from the doc comments, and the evidence level (compile-checked only, never run by the author)
