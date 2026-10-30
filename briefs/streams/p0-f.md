@@ -198,3 +198,10 @@ Current phase: P1
 then `golangci-lint run ./...` (0 issues, no deprecation warning on stderr) and `golangci-lint fmt --diff ./...` (no diff). If
 the formatter now reports diffs in existing Go files (the rules are the same as before, so none are expected), stop and report
 BLOCKED with the output.
+
+## Item P0-F-012
+`.github/workflows/spikes.yml`, linux job only. Found during the P0-SP1-001 / P0-SP5-001 merges: the linux job runs `go -C spikes vet ./...`
+with cgo enabled and installs only Xvfb tools, but `spikes/gioeditor` imports Gio, which needs cgo and native development packages on
+Linux. Add one `apt-get install -y` step before the vet step for the packages Gio v0.10.3 lists for Ubuntu (read the Gio install
+documentation for that version, `gioui.org/doc/install/linux`; do not rely on memory, record the list and the source URL in the commit body).
+Do not change the windows or macos jobs, the action pins or the triggers. Verify with actionlint. The job cannot be run locally; say so in GATES.

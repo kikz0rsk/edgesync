@@ -83,6 +83,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: `golangci-lint config verify` exits 0; `golangci-lint run ./...` exits 0 and prints no `extra-rules` deprecation warning; `golangci-lint fmt --diff ./...` prints no diff
   DoD: only the gofumpt setting changes, to `extra: { group-params: true, clothe-returns: true }`; commit `build(lint): use non-deprecated gofumpt extra keys [FEAT-169]`
 
+- [ ] [P0-F-012] spikes.yml linux job installs the Gio build dependencies [FEAT-177, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-012]
+  Needs: P0-SP5-001
+  Files: .github/workflows/spikes.yml
+  Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0; the linux job has an apt-get install step that runs before `go -C spikes vet ./...` and installs every package Gio v0.10.3 documents for Ubuntu (package list verified at execution time against the Gio install documentation for v0.10.3, recorded in the commit body)
+  DoD: only the linux job's install step changes; the windows and macos jobs are untouched; commit `ci(spikes): install Gio linux build dependencies [FEAT-177]`
+
 ### SP1 - Windows input, DPI, service and secure desktop
 
 - [x] [P0-SP1-001] LL hook spike with ring buffer, GC stress, watchdog and Raw Input deltas [FEAT-177, FEAT-033] [tier:sonnet why:LL-hook message-loop threading and non-allocating callbacks under GC pressure] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-001]
@@ -300,6 +306,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: briefs/spikes/sp4.md
   Tests: covers purego bindings, CGPoint by value, taps (session vs HID), TCC on CI, injection fields, lazy provider, concealed type, file promises (verifiable vs not), status item, overlay, bundle; each with go/no-go, evidence level (CI-verified / compile-only / unverifiable) and the decision it confirms or contradicts (D-11, D-33, D-34, D-39)
   DoD: contradictions and unverifiable-but-required behaviours listed under "Requires user decision"; commit `docs(spikes): SP4 findings [FEAT-177]`
+
+- [ ] [P0-SP4-008] README for the macOS event-tap spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-008]
+  Needs: P0-SP4-002
+  Files: spikes/macos/tap/README.md
+  Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/tap`), run command with every flag of `cmd/tap` (read from its source), what to observe (TCC state line, tap created, counters, re-enable path), what to paste back, and the evidence level (compile-checked only, never run by the author)
+  DoD: content derived only from the existing code and the P0-SP4-002 report; commit `docs(spikes): macOS event tap README [FEAT-177]`
 
 ### SP5 - Core tech (Gio editor, QUIC, mDNS, Cap'n Proto, SPAKE2, IPC)
 

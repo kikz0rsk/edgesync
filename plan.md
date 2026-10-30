@@ -190,3 +190,5 @@ Never mark `[x]` on a subagent's word alone. When a subagent leaves churn (stray
 <!-- NOTE: 2026-10-30 - P0-F-007 and P0-F-008 done. P0-F-011 appended (D-122, amends D-55: deprecated gofumpt extra-rules key); P0 now has 58 items. -->
 
 <!-- NOTE: 2026-10-30 - P0-F foundation block complete (P0-F-001..011 all [x]). task ci:local exits 0 on the tree. Verified deviations, accepted by the orchestrator: Taskfile cross/lint:cross patterns are built from directories that exist (Go exits 1 on literal patterns naming absent directories); ci.yml adds top-level permissions: contents: read and builds the windows/darwin lint package list at runtime. ci.yml and spikes.yml have not run on GitHub yet (first push). Spike fan-out (SP1..SP5, N=5) starts next. -->
+
+<!-- NOTE: 2026-10-30 - P0-F-012 and P0-SP4-008 appended (found while merging SP1-001/SP3-001/SP4-002/SP5-001): the spikes.yml linux job lacks Gio's native build dependencies (gioeditor needs cgo on Linux), and spikes/macos/tap has no README. P0 now has 60 items. -->

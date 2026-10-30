@@ -70,3 +70,9 @@ User-owned. Results (run URL, logs, screenshots) into `qa/manual/results/p0-sp4-
 
 ## Item P0-SP4-007
 `briefs/spikes/sp4.md`: summary table with an "evidence level" column; sections per mechanism; "Recommended design for P2 M1 and P4 F3"; "Unverifiable without a Mac" list; "Requires user decision" for contradictions of D-11, D-33, D-34, D-39 (for example: purego cannot implement a required delegate - cgo would violate D-34; Finder paste of promises unverifiable).
+
+## Item P0-SP4-008
+`spikes/macos/tap/README.md`. The spike rules (briefs/plan-phase-0.md, top) require a README in every spike directory; P0-SP4-002's file list
+did not include one. Write it from the code in `spikes/macos/tap` and `spikes/macos/cmd/tap` and from the P0-SP4-002 report: purpose, exact
+build command, exact run commands with every flag read from `cmd/tap/main.go`, what to observe, what to paste back, evidence level. Match the
+shape of `spikes/macos/README.md`. Do not edit any Go file.
