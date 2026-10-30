@@ -308,13 +308,13 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: covers purego bindings, CGPoint by value, taps (session vs HID), TCC on CI, injection fields, lazy provider, concealed type, file promises (verifiable vs not), status item, overlay, bundle; each with go/no-go, evidence level (CI-verified / compile-only / unverifiable) and the decision it confirms or contradicts (D-11, D-33, D-34, D-39)
   DoD: contradictions and unverifiable-but-required behaviours listed under "Requires user decision"; commit `docs(spikes): SP4 findings [FEAT-177]`
 
-- [ ] [P0-SP4-008] README for the macOS event-tap spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-008]
+- [x] [P0-SP4-008] README for the macOS event-tap spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-008]
   Needs: P0-SP4-002
   Files: spikes/macos/tap/README.md
   Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/tap`), run command with every flag of `cmd/tap` (read from its source), what to observe (TCC state line, tap created, counters, re-enable path), what to paste back, and the evidence level (compile-checked only, never run by the author)
   DoD: content derived only from the existing code and the P0-SP4-002 report; commit `docs(spikes): macOS event tap README [FEAT-177]`
 
-- [ ] [P0-SP4-009] README for the macOS tray, overlay and bundle spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-009]
+- [x] [P0-SP4-009] README for the macOS tray, overlay and bundle spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-009]
   Needs: P0-SP4-005
   Files: spikes/macos/ui/README.md
   Tests: the README names the exact build commands (`bash spikes/macos/bundle/make-bundle.sh`, and the per-arch `GOOS=darwin ... go -C spikes build ./macos/cmd/trayoverlay`), run commands with every flag of `cmd/trayoverlay` (read from its source), what to observe (status item "ES", menu actions, overlay above normal and full-screen spaces, clean exit), what to paste back, the "second-source" constant list copied from the doc comments in `spikes/macos/ui`, the open question "is NSFloatingWindowLevel enough above full-screen spaces (fallback NSStatusWindowLevel = 25)", and the evidence level (compile-checked only, never run by the author)
