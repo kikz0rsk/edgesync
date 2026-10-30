@@ -206,6 +206,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 - [ ] [P0-SP3-003] Portal clipboard spike [FEAT-177, FEAT-078] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-003]
   Needs: P0-SP3-002
   Files: spikes/linux/portal/clipboard.go, spikes/linux/cmd/wlclip/main.go, spikes/linux/cmd/wlclip/README.md
+  <!-- NOTE: 2026-10-30 - Files extended by spikes/linux/portal/clipboard_test.go (host tests of the clipboard portal flow against the fake bus, as P0-SP3-002 did for its portal code; the agent had kept them outside the repo only because the Files line omitted them). -->
   Tests: spike must demonstrate on GNOME (user run): RequestClipboard on a RemoteDesktop session and on an InputCapture session (record which works); SetSelection with text/plain;charset=utf-8, text/html, image/png, text/uri-list, x-special/gnome-copied-files; SelectionTransfer served after a configurable delay with paste behaviour in Text Editor and Nautilus; SelectionOwnerChanged + SelectionRead of each MIME for a local copy; whether clipboard access stops when the session is inactive
   DoD: spike gates green incl. `GOOS=linux` vet; commit `spike(linux): portal clipboard [FEAT-177]`
 
