@@ -82,3 +82,8 @@ shape of `spikes/macos/README.md`. Do not edit any Go file.
 and `spikes/macos/bundle` (Info.plist, make-bundle.sh). Read the code and the P0-SP4-005 report (second-source constants are listed in doc comments in
 `spikes/macos/ui`; the open question is whether NSFloatingWindowLevel suffices above full-screen spaces, fallback NSStatusWindowLevel = 25). Do not edit
 any other file.
+
+## Item P0-SP4-010
+`spikes/macos/inject/README.md`. Same purpose and shape as P0-SP4-008 and P0-SP4-009 for `spikes/macos/inject` and `spikes/macos/cmd/inject`
+(found missing when P0-SP4-006 was merged). Read the code and its doc comments (constant provenance is second-source: servo core-graphics bindings,
+Chromium kVK keycodes). Do not edit any other file.

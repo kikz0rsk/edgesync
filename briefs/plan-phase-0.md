@@ -290,7 +290,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests (CI): bundle built and ad-hoc signed (`codesign -s - --force`), launched for 5 s, process alive, no crash report, `screencapture` artifact uploaded showing the status item and overlay
   DoD: spike gates green; Info.plist has `LSUIElement`, `NSAccessibilityUsageDescription`-style usage strings verified against Apple docs at execution time; commit `spike(macos): tray, overlay and app bundle [FEAT-177]`
 
-- [ ] [P0-SP4-006] macOS CI steps and manual dispatch script [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-006]
+- [x] [P0-SP4-006] macOS CI steps and manual dispatch script [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-006]
   Needs: P0-SP4-002, P0-SP4-003, P0-SP4-004, P0-SP4-005
   Files: .github/workflows/spikes.yml (macos job steps: bundle build/launch, artifacts), qa/manual/p0-sp4-macos.md
   Tests: actionlint clean; script tells the user how to push the branch, dispatch the workflow, and which artifacts/logs to share
@@ -319,6 +319,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: spikes/macos/ui/README.md
   Tests: the README names the exact build commands (`bash spikes/macos/bundle/make-bundle.sh`, and the per-arch `GOOS=darwin ... go -C spikes build ./macos/cmd/trayoverlay`), run commands with every flag of `cmd/trayoverlay` (read from its source), what to observe (status item "ES", menu actions, overlay above normal and full-screen spaces, clean exit), what to paste back, the "second-source" constant list copied from the doc comments in `spikes/macos/ui`, the open question "is NSFloatingWindowLevel enough above full-screen spaces (fallback NSStatusWindowLevel = 25)", and the evidence level (compile-checked only, never run by the author)
   DoD: content derived only from the existing code and the P0-SP4-005 report; commit `docs(spikes): macOS tray and overlay README [FEAT-177]`
+
+- [ ] [P0-SP4-010] README for the macOS event injection spike [FEAT-177] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-010]
+  Needs: P0-SP4-003
+  Files: spikes/macos/inject/README.md
+  Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/inject`), the run command with every flag of `cmd/inject` (read from its source), the permissions needed (Accessibility / Post Event access), what to observe, what to paste back, the "second-source" constant provenance from the doc comments, and the evidence level (compile-checked only, never run by the author)
+  DoD: content derived only from the existing code; commit `docs(spikes): macOS event injection README [FEAT-177]`
 
 ### SP5 - Core tech (Gio editor, QUIC, mDNS, Cap'n Proto, SPAKE2, IPC)
 
