@@ -1,0 +1,4 @@
+mode: set
+github.com/kikz0r/edgesync/internal/alpha/alpha.go:3.2,5.3 2 1
+github.com/kikz0r/edgesync/internal/beta/beta.go:3.2,5.3 1 1
+github.com/kikz0r/edgesync/internal/beta/beta.go:7.2,9.3 1 0
