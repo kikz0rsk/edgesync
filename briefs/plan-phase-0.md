@@ -321,7 +321,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestSnap_ToNeighbourEdgeWithinThreshold, TestSnap_NoSnapBeyondThreshold, TestSnap_PrefersClosestEdge, TestSnap_OverlapSegment (host); spike must demonstrate (user run): drag of multi-monitor machine groups, snapping within 12 logical px, overlap highlight, Ctrl+wheel zoom, middle-drag pan, arrow-key nudge (Shift = 10 px), light/dark palette toggle, frame-time log with `-machines 64`
   DoD: spike gates green; builds with `CGO_ENABLED=0` on Windows; uses gioui.org v0.10.3; commit `spike(gui): Gio layout editor proof [FEAT-177]`
 
-- [ ] [P0-SP5-002] quic-go latency and priority bench with TCP comparison [FEAT-177, FEAT-117, FEAT-118, FEAT-170] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-002]
+- [x] [P0-SP5-002] quic-go latency and priority bench with TCP comparison [FEAT-177, FEAT-117, FEAT-118, FEAT-170] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-002]
   Needs: P0-F-005
   Files: spikes/quicbench/peer.go, spikes/quicbench/bench_test.go, spikes/quicbench/cmd/quicbench/main.go, spikes/quicbench/README.md
   <!-- NOTE: 2026-10-30 - D-123: Files extended by spikes/quicbench/clock_windows.go and spikes/quicbench/clock_other.go (QueryPerformanceCounter clock; time.Now is too coarse on Windows). -->
