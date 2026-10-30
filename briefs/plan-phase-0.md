@@ -253,7 +253,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### SP4 - macOS via purego (compile + CI only)
 
-- [ ] [P0-SP4-001] purego framework bindings and display enumeration [FEAT-177, FEAT-055] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-001]
+- [x] [P0-SP4-001] purego framework bindings and display enumeration [FEAT-177, FEAT-055] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-001]
   Needs: P0-F-005
   Files: spikes/macos/fw/frameworks_darwin.go, spikes/macos/fw/cg_darwin.go, spikes/macos/fw/cf_darwin.go, spikes/macos/fw/objc_darwin.go, spikes/macos/cmd/displays/main.go, spikes/macos/fw/displays_integration_test.go, spikes/macos/README.md
   Tests: `GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build ./macos/...` and `GOARCH=amd64` on the host; TestDisplays_ListBoundsAndScale (integration, CI macOS) incl. a `CGWarpMouseCursorPosition` call with CGPoint by value followed by a position read-back
