@@ -1,0 +1,106 @@
+version: '3'
+
+vars:
+  UCRT64: 'D:/Development/msys2/ucrt64/bin'
+  CAPNP_DEFAULT: 'D:\Development\vcpkg\installed\x64-windows\tools\capnproto\capnp.exe'
+  AGENT_PACKAGES:
+    sh: for d in internal cmd/edgesync-agent; do if [ -d "$d" ]; then printf '%s ' "./$d/..."; fi; done
+  LINT_PACKAGES:
+    sh: for d in internal cmd/edgesync-agent cmd/edgesync-service tools; do if [ -d "$d" ]; then printf '%s ' "./$d/..."; fi; done
+
+tasks:
+  fmt:
+    desc: Format Go sources with gofumpt and goimports
+    cmds:
+      - golangci-lint fmt
+
+  lint:
+    desc: Run golangci-lint over the module
+    cmds:
+      - golangci-lint run ./...
+
+  lint:cross:
+    desc: Lint agent-side packages for linux and darwin
+    cmds:
+      - GOOS=linux CGO_ENABLED=0 golangci-lint run {{.LINT_PACKAGES}}
+      - GOOS=darwin CGO_ENABLED=0 golangci-lint run {{.LINT_PACKAGES}}
+
+  vet:
+    desc: Run go vet over the module
+    cmds:
+      - go vet ./...
+
+  build:
+    desc: Build every package of the module
+    cmds:
+      - go build ./...
+
+  cross:
+    desc: Cross-compile agent-side packages for linux/amd64 and darwin/arm64
+    cmds:
+      - '{{if .AGENT_PACKAGES}}GOOS=linux GOARCH=amd64 CGO_ENABLED=0 go build {{.AGENT_PACKAGES}}{{else}}echo "cross: no agent-side packages yet"{{end}}'
+      - '{{if .AGENT_PACKAGES}}GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go build {{.AGENT_PACKAGES}}{{else}}echo "cross: no agent-side packages yet"{{end}}'
+
+  test:
+    desc: Run unit tests
+    cmds:
+      - go test ./...
+
+  test:race:
+    desc: Run unit tests with the race detector (cgo via msys2 ucrt64 gcc on Windows)
+    env:
+      CGO_ENABLED: '1'
+      CC: gcc
+    cmds:
+      - '{{if eq OS "windows"}}PATH="{{.UCRT64}};$PATH" {{end}}go test -race ./...'
+
+  cover:
+    desc: Enforce the per-package statement coverage gate
+    cmds:
+      - go test -coverprofile=coverage.out ./...
+      - go list ./... > coverage.pkgs
+      - go run ./tools/covercheck -profile coverage.out -min 85 -exclude tools/coverage-exclude.txt -packages coverage.pkgs
+
+  fuzz:smoke:
+    desc: Run every fuzz target for 30 seconds each
+    cmds:
+      - go run ./tools/fuzzsmoke -fuzztime 30s ./...
+
+  vuln:
+    desc: Scan the module with govulncheck
+    cmds:
+      - go tool -modfile=tools/tools.mod govulncheck ./...
+
+  actionlint:
+    desc: Lint GitHub Actions workflows
+    cmds:
+      - go tool -modfile=tools/tools.mod actionlint
+
+  gen:
+    desc: Run go generate over the module
+    env:
+      CAPNP: '{{.CAPNP | default .CAPNP_DEFAULT}}'
+    cmds:
+      - go generate ./...
+
+  gen:check:
+    desc: Regenerate code and fail if the committed output differs
+    cmds:
+      - task: gen
+      - git diff --exit-code
+
+  ci:local:
+    desc: Run every gate in CI order
+    cmds:
+      - task: lint
+      - task: lint:cross
+      - task: vet
+      - task: build
+      - task: cross
+      - task: test
+      - task: test:race
+      - task: cover
+      - task: fuzz:smoke
+      - task: vuln
+      - task: actionlint
+      - task: gen:check
