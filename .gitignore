@@ -1,0 +1,46 @@
+# Build output
+/bin/
+/dist/
+/spikes/bin/
+/spikes/out/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.app/
+!/packaging/**/fixtures/**
+
+# Coverage, profiles, fuzz caches
+coverage.out
+coverage.pkgs
+c.out
+*.coverprofile
+*.prof
+*.pprof
+/testdata/fuzz/**/cache/
+
+# Go workspace files (the repo uses a single module plus spikes/)
+go.work
+go.work.sum
+
+# Packaging intermediates
+/packaging/windows/obj/
+/packaging/windows/out/
+*.wixpdb
+*.msi
+*.zip
+*.tar.gz
+
+# Local Claude Code worktrees and editor files
+/.claude/worktrees/
+/.claude/settings.local.json
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs and local state
+*.log
