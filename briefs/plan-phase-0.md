@@ -141,7 +141,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### SP2 - Windows COM shell (virtual files, delayed rendering, OLE drag-and-drop)
 
-- [ ] [P0-SP2-001] Pure-Go COM infrastructure: vtables, handle table, STA thread [FEAT-177, FEAT-103] [tier:sonnet why:hand-built COM vtables, reference counting and STA threading in pure Go] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-001]
+- [x] [P0-SP2-001] Pure-Go COM infrastructure: vtables, handle table, STA thread [FEAT-177, FEAT-103] [tier:sonnet why:hand-built COM vtables, reference counting and STA threading in pure Go] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-001]
   Needs: P0-F-005
   Files: spikes/internal/wincom/vtable_windows.go, spikes/internal/wincom/unknown_windows.go, spikes/internal/wincom/dataobject_windows.go, spikes/internal/wincom/enumformatetc_windows.go, spikes/internal/wincom/stream_windows.go, spikes/internal/wincom/dropsource_windows.go, spikes/internal/wincom/droptarget_windows.go, spikes/internal/wincom/sta_windows.go, spikes/internal/wincom/handles.go, spikes/internal/wincom/handles_test.go, spikes/internal/wincom/com_windows_test.go
   Tests: TestHandles_AddGetRelease, TestHandles_ConcurrentAccess (host); TestCOM_QueryInterfaceAddRefRelease, TestCOM_EnumFormatEtcNextSkipReset, TestCOM_IStreamReadSeekStat (host, calls through the vtables in-process via syscall.SyscallN); callbacks created once per method (count asserted <= 64)
