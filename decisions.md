@@ -873,3 +873,15 @@ One decision per answer (Q-NN -> D-(111+NN)). Superseded text stays in place and
 - Alternatives considered: A (as locked in D-61), C (as A plus PRIMARY selection sync between Linux machines).
 - Supersedes D-61 (part: the rule that concealed or sensitive content is never announced).
 - Source: user Q&A, `briefs/open-questions.md` Q-10.
+
+### D-122 - gofumpt extra rules via the non-deprecated keys (2026-10-30; amends D-55; locked by orchestrator - user to review)
+- Decision: in `.golangci.yml` the formatter setting `gofumpt: { extra-rules: true }` is replaced by
+  `gofumpt: { extra: { group-params: true, clothe-returns: true } }`. Behaviour is identical: gofumpt v0.12.0's `-extra` flag
+  consists of exactly two rules (group adjacent parameters of the same type; avoid naked returns), and golangci-lint v2.15.0
+  prints a deprecation warning on every run for the old key and offers the two rules as separate keys (verified 2026-10-30
+  against the gofumpt v0.12.0 README and the golangci-lint v2.15.0 JSON schema).
+- Rationale: P0-F-007 implemented D-55 literally and every lint run now prints the warning twice; the warning would train
+  agents and people to ignore lint output.
+- Alternatives considered: keep the deprecated key (noise, and the key can be removed in a later v2 release; rejected).
+- Amends D-55 (the extra-rules setting only). Implemented by P0-F-011.
+- Source: orchestrator verification of the P0-F-007 result.

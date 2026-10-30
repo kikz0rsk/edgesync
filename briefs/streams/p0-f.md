@@ -191,3 +191,10 @@ Parent-only. A Fork re-checks every pinned version in `compatibility-matrix.md` 
 Current phase: P1
 -->
 ```
+
+## Item P0-F-011
+`.golangci.yml`, one setting (D-122). In `formatters.settings.gofumpt` replace `extra-rules: true` with
+`extra: { group-params: true, clothe-returns: true }`. Change nothing else in the file. Verify with `golangci-lint config verify`,
+then `golangci-lint run ./...` (0 issues, no deprecation warning on stderr) and `golangci-lint fmt --diff ./...` (no diff). If
+the formatter now reports diffs in existing Go files (the rules are the same as before, so none are expected), stop and report
+BLOCKED with the output.

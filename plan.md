@@ -186,3 +186,5 @@ Never mark `[x]` on a subagent's word alone. When a subagent leaves churn (stray
 
 <!-- NOTE: 2026-10-30 - Plan approved by the user (commit 41ce2e1). The plan is now sacred and append-only. P0 starts with the foundation block P0-F.
   P0-F-003 done by the user: Inno Setup 7.1.1 installed manually at D:\Program Files\Inno Setup 7\ (not via winget); ISCC path and checks recorded in qa/manual/results/p0-f-toolchain.md. -->
+
+<!-- NOTE: 2026-10-30 - P0-F-007 and P0-F-008 done. P0-F-011 appended (D-122, amends D-55: deprecated gofumpt extra-rules key); P0 now has 58 items. -->

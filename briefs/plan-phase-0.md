@@ -51,13 +51,13 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: from the repo root each of these runs and prints its version or help: `go tool -modfile=tools/tools.mod gofumpt -version` (v0.12.0), `go tool -modfile=tools/tools.mod govulncheck -version` (x/vuln v1.9.0), `go tool -modfile=tools/tools.mod actionlint -version` (1.7.12), `go tool -modfile=tools/tools.mod goversioninfo -h`, `go build -modfile=tools/tools.mod -o bin/capnpc-go.exe capnproto.org/go/capnp/v3/capnpc-go`; root `go.mod` unchanged
   DoD: tools.mod `module github.com/kikz0r/edgesync`, `go 1.27`, exact versions per D-54; any failing invocation -> BLOCKED with output; commit `build(tools): pin dev tools via tools.mod [FEAT-169]`
 
-- [ ] [P0-F-007] golangci-lint v2 strict configuration [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-007]
+- [x] [P0-F-007] golangci-lint v2 strict configuration [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-007]
   Needs: P0-F-001, P0-F-004
   Files: .golangci.yml
   Tests: `golangci-lint config verify` exits 0; `golangci-lint run ./...` exits 0
   DoD: contents exactly per D-55 and the brief (linter list, settings, depguard rules, forbidigo patterns, exclusions, formatters gofumpt + goimports with local prefix); commit `build(lint): strict golangci-lint v2 config [FEAT-169]`
 
-- [ ] [P0-F-008] Coverage policy checker tools/covercheck [FEAT-169, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-008]
+- [x] [P0-F-008] Coverage policy checker tools/covercheck [FEAT-169, FEAT-167] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-008]
   Needs: P0-F-007
   Files: tools/covercheck/main.go, tools/covercheck/covercheck.go, tools/covercheck/covercheck_test.go, tools/covercheck/testdata/ok.out, tools/covercheck/testdata/low.out, tools/covercheck/testdata/notests.out, tools/coverage-exclude.txt
   Tests: TestParseProfile_SetAndAtomicModes, TestPerPackageCoverage_MergesDuplicateBlocks, TestCheck_FailsBelowMinimum, TestCheck_FailsWhenIncludedPackageHasNoProfile, TestCheck_ExcludedPatternsIgnored, TestCLI_ExitCodes
@@ -76,6 +76,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   DoD: every action pinned to an exact release tag verified via the GitHub API at execution time; triggers push + pull_request on main; commit `ci: main CI pipeline [FEAT-167]`
 
 <!-- NOTE: 2026-10-30 - D-121 removed the clipboard sensitivity skip (concealed content is shared). The sensitivity-format observations in SP2 and SP4 stay informational: they are not go/no-go criteria and nothing in P1-P5 depends on them. the WiX toolchain item P0-F-003 is superseded by the Inno Setup install of the same ID (D-118). -->
+
+- [ ] [P0-F-011] Replace the deprecated gofumpt extra-rules key (D-122) [FEAT-169] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-011]
+  Needs: P0-F-007
+  Files: .golangci.yml
+  Tests: `golangci-lint config verify` exits 0; `golangci-lint run ./...` exits 0 and prints no `extra-rules` deprecation warning; `golangci-lint fmt --diff ./...` prints no diff
+  DoD: only the gofumpt setting changes, to `extra: { group-params: true, clothe-returns: true }`; commit `build(lint): use non-deprecated gofumpt extra keys [FEAT-169]`
 
 ### SP1 - Windows input, DPI, service and secure desktop
 
