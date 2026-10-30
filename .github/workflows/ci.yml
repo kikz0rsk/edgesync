@@ -1,0 +1,118 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: golangci/golangci-lint-action@v9.3.0
+        with:
+          version: v2.15.0
+      - name: Collect agent-side packages
+        id: agent
+        shell: bash
+        run: |
+          pkgs=""
+          for d in internal cmd/edgesync-agent cmd/edgesync-service tools; do
+            if [ -d "$d" ]; then pkgs="$pkgs ./$d/..."; fi
+          done
+          echo "packages=${pkgs# }" >> "$GITHUB_OUTPUT"
+      - name: Lint agent-side packages for windows
+        uses: golangci/golangci-lint-action@v9.3.0
+        env:
+          GOOS: windows
+          CGO_ENABLED: '0'
+        with:
+          version: v2.15.0
+          args: ${{ steps.agent.outputs.packages }}
+      - name: Lint agent-side packages for darwin
+        uses: golangci/golangci-lint-action@v9.3.0
+        env:
+          GOOS: darwin
+          CGO_ENABLED: '0'
+        with:
+          version: v2.15.0
+          args: ${{ steps.agent.outputs.packages }}
+
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest, macos-latest, ubuntu-24.04]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: arduino/setup-task@v3.0.0
+        with:
+          version: 3.48.0
+      - name: Verify gcc for the race detector
+        if: runner.os == 'Windows'
+        shell: bash
+        run: gcc --version
+      - run: task build test test:race cover
+
+  cross:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: arduino/setup-task@v3.0.0
+        with:
+          version: 3.48.0
+      - run: task cross
+
+  gen-check:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: arduino/setup-task@v3.0.0
+        with:
+          version: 3.48.0
+      - name: Install Cap'n Proto compiler
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y capnproto
+      - run: CAPNP=capnp task gen:check
+
+  vuln:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: arduino/setup-task@v3.0.0
+        with:
+          version: 3.48.0
+      - run: task vuln
+
+  actionlint:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-go@v7.0.0
+        with:
+          go-version: '1.27.3'
+      - uses: arduino/setup-task@v3.0.0
+        with:
+          version: 3.48.0
+      - run: task actionlint
