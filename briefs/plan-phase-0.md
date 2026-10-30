@@ -185,7 +185,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 
 ### SP3 - Linux (Wayland portals + EI, X11, file paste, DnD, GNOME indicator)
 
-- [ ] [P0-SP3-001] Pure-Go EI wire codec spike [FEAT-177, FEAT-073] [tier:sonnet why:binary protocol implementation from the EI protocol specification] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-001]
+- [x] [P0-SP3-001] Pure-Go EI wire codec spike [FEAT-177, FEAT-073] [tier:sonnet why:binary protocol implementation from the EI protocol specification] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-001]
   Needs: P0-F-005
   Files: spikes/linux/ei/wire.go, spikes/linux/ei/wire_test.go, spikes/linux/ei/handshake.go, spikes/linux/ei/objects.go, spikes/linux/ei/client.go, spikes/linux/ei/client_test.go, spikes/linux/ei/fd_linux.go, spikes/linux/ei/README.md
   Tests: TestWire_HeaderEncodeDecode, TestWire_GoldenHandshakeFrames, TestWire_RejectsShortAndOversized, TestClient_HandshakeAgainstScriptedServer (net.Pipe, host); FuzzDecodeFrame (30 s smoke)
