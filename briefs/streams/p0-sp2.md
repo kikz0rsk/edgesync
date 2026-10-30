@@ -76,3 +76,8 @@ User-owned. Results into `qa/manual/results/p0-sp2-windows-shell.md`.
 
 ## Item P0-SP2-007
 `briefs/spikes/sp2.md`: summary table (mechanism | go/no-go | evidence | decision confirmed/contradicted), sections per mechanism, "Recommended design for P2 W2 and P4 F1/F2" (COM package API for the main module, threading, prefetch strategy for Explorer reads, edge drop-target strategy), "Requires user decision" for anything that contradicts D-10, D-11, D-12, D-13, D-40 or D-61.
+
+## Item P0-SP2-008
+`spikes/winclip` has untagged pure logic (`cfhtml.go`, `dib.go` and their tests, which must keep running on every OS) and a windows-tagged `main.go`, so on linux and
+macOS the package is a `package main` without `main` (`function main is undeclared in the main package`). Add `spikes/winclip/main_other.go`
+(`//go:build !windows`, `package main`) with a `main` that writes "windows only" to stderr and exits 2. Do not touch any other file.

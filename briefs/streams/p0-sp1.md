@@ -81,3 +81,12 @@ User-owned. The parent sends the script and records results into `qa/manual/resu
 
 ## Item P0-SP1-007
 `briefs/spikes/sp1.md` structure: Summary table (mechanism | go/no-go | evidence | numbers | decision confirmed/contradicted); one section per mechanism; "Recommended design for P2 W1/W2" (concrete: which delta source, which hide strategy, GC settings, watchdog marker kind, helper launch details); "Requires user decision" (every contradiction of D-41, D-47, D-50, D-63, D-64, with options). Never restate a decision as changed.
+
+## Item P0-SP1-011
+Found by the orchestrator while merging P0-SP2-004 (a whole-tree cross build, which no per-directory gate had run): `spikes/wininject/main.go` and
+`spikes/wincursor/main.go` carry no build tag, so `go vet ./...` and `go build ./...` fail on the linux and macOS jobs of the spikes workflow
+(`undefined: monitorInfo`, `undefined: winhook.Hook`). Add `//go:build windows` plus a blank line as the first lines of both files. `wininject`
+also has untagged pure logic (`edges.go`, `edges_test.go`) that must keep building and testing on every OS, so after tagging `main.go` the package has no
+`main` on non-Windows; add `spikes/wininject/main_other.go` (`//go:build !windows`) with `package main` and a `main` that writes "windows only" to stderr
+and exits 2. `wincursor` has only Windows files besides `main.go`, so tagging is enough. Verify per package with `go build -o NUL` and `go vet` for
+GOOS=linux and GOOS=darwin (CGO_ENABLED=0), and confirm the windows build and tests are unchanged.

@@ -205,3 +205,11 @@ with cgo enabled and installs only Xvfb tools, but `spikes/gioeditor` imports Gi
 Linux. Add one `apt-get install -y` step before the vet step for the packages Gio v0.10.3 lists for Ubuntu (read the Gio install
 documentation for that version, `gioui.org/doc/install/linux`; do not rely on memory, record the list and the source URL in the commit body).
 Do not change the windows or macos jobs, the action pins or the triggers. Verify with actionlint. The job cannot be run locally; say so in GATES.
+
+## Item P0-F-013
+Add a `spikes:cross` task to `Taskfile.yml`. For each target (GOOS=linux GOARCH=amd64 and GOOS=darwin GOARCH=arm64, CGO_ENABLED=0): list the spike packages for that OS
+with `GOOS=<os> go -C spikes list ./...`, drop `gioeditor` (Gio needs cgo on linux and macOS; those jobs run on native runners with the native libraries), and for each remaining
+package run `go -C spikes build -o <null device> ./<pkg>` and `go -C spikes vet ./<pkg>`. A bare `go build ./<pkg>` writes a binary named after the directory into the
+spikes module root, so always pass `-o` (use `/dev/null`; the Taskfile shell is mvdan/sh, verify on this Windows host that it maps to the null device, otherwise use `NUL` in a
+platform-conditional). Packages that contain only test files are not an error (skip them with `go list -f '{{if .GoFiles}}{{.ImportPath}}{{end}}'`; `go list` for that OS already
+omits packages whose files are all excluded by build constraints). The task must exit non-zero if any package fails. Do not add it to `ci:local`.

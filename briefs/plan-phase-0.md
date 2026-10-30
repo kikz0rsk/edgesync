@@ -89,6 +89,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0; the linux job has an apt-get install step that runs before `go -C spikes vet ./...` and installs every package Gio v0.10.3 documents for Ubuntu (package list verified at execution time against the Gio install documentation for v0.10.3, recorded in the commit body)
   DoD: only the linux job's install step changes; the windows and macos jobs are untouched; commit `ci(spikes): install Gio linux build dependencies [FEAT-177]`
 
+- [ ] [P0-F-013] Taskfile task that builds and vets every spike package for linux and darwin [FEAT-169, FEAT-177] [tier:haiku] [owner:P0-F] [brief:briefs/streams/p0-f.md#item-p0-f-013]
+  Needs: P0-SP1-011, P0-SP2-008
+  Files: Taskfile.yml
+  Tests: `task --list` shows `spikes:cross`; `task spikes:cross` exits 0 on the current tree and fails (non-zero) when a Windows-only `package main` loses its build tag (the agent proves this once by temporarily removing a tag in a scratch copy and restoring it, never committing it)
+  DoD: the task lists the spike packages with `go -C spikes list ./...` per target OS, excludes `gioeditor` (needs cgo on linux and macOS), and for each package runs `go build -o <null device>` and `go vet` with CGO_ENABLED=0 for GOOS=linux GOARCH=amd64 and GOOS=darwin GOARCH=arm64; `ci:local` does NOT depend on it (spikes are outside the main gates); commit `build(task): spikes:cross whole-tree cross build and vet [FEAT-177]`
+
 ### SP1 - Windows input, DPI, service and secure desktop
 
 - [x] [P0-SP1-001] LL hook spike with ring buffer, GC stress, watchdog and Raw Input deltas [FEAT-177, FEAT-033] [tier:sonnet why:LL-hook message-loop threading and non-allocating callbacks under GC pressure] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-001]
@@ -138,6 +144,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: briefs/spikes/sp1.md
   Tests: covers hooks under GC, watchdog, Raw Input vs re-centre, cursor hiding, SendInput absolute/scancode, DPI + edges, service/helper/token, desktop following, UIPI, SendSAS + policy, pre-login, pipe SDDL, signing proxy; each with go/no-go, numbers, and the decision it confirms or contradicts (D-41, D-47, D-50, D-63, D-64)
   DoD: no recommendation silently changes a decision (contradictions are listed under "Requires user decision"); commit `docs(spikes): SP1 findings [FEAT-177]`
+
+- [ ] [P0-SP1-011] Windows-only spike mains build on linux and darwin (wininject, wincursor) [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-011]
+  Needs: P0-SP1-002, P0-SP1-003
+  Files: spikes/wininject/main.go, spikes/wininject/main_other.go, spikes/wincursor/main.go
+  Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL` and `go vet` of ./wininject and ./wincursor both succeed; on windows `go -C spikes vet ./...`, `go -C spikes test ./wininject/...` and the build of both commands still succeed with identical behaviour
+  DoD: `wininject/main.go` and `wincursor/main.go` start with `//go:build windows`; `wininject/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2, because wininject has untagged pure logic (edges.go) that must keep building and testing on every OS; commit `fix(spikes): tag windows-only spike mains [FEAT-177]`
 
 ### SP2 - Windows COM shell (virtual files, delayed rendering, OLE drag-and-drop)
 
@@ -189,6 +201,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: briefs/spikes/sp2.md
   Tests: covers COM infrastructure, virtual-file paste, Explorer progress/cancel, blocking behaviour, delayed rendering per format, sensitivity formats, edge drop target, drag source, UIPI, Gio drop; each with go/no-go and the decision it confirms or contradicts (D-11, D-12, D-13, D-40, D-61)
   DoD: contradictions listed under "Requires user decision"; commit `docs(spikes): SP2 findings [FEAT-177]`
+
+- [ ] [P0-SP2-008] winclip builds on linux and darwin [FEAT-177] [tier:haiku] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-008]
+  Needs: P0-SP2-003
+  Files: spikes/winclip/main_other.go
+  Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL ./winclip` and `go vet ./winclip` succeed; `go -C spikes test ./winclip/...` still passes on windows and on linux (the pure CF_HTML and DIB tests run everywhere)
+  DoD: `winclip/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2; no other file changes; commit `fix(spikes): winclip builds on non-windows [FEAT-177]`
 
 ### SP3 - Linux (Wayland portals + EI, X11, file paste, DnD, GNOME indicator)
 
