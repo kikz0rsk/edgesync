@@ -341,7 +341,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate (user run on 2 Windows PCs + GNOME box, incl. machines with WireGuard/Netbird adapters): advertise `_edgesync._udp` with TXT keys from D-43, browse, time-to-first-discovery, interfaces used, behaviour with VPN adapters, Windows firewall prompt; `-lib=hashicorp|dnssd`
   DoD: spike gates green; uses hashicorp/mdns v1.0.7 and brutella/dnssd v1.2.14; commit `spike(net): mDNS discovery comparison [FEAT-177]`
 
-- [ ] [P0-SP5-004] Cap'n Proto toolchain and go-capnp API spike [FEAT-177, FEAT-120] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-004]
+- [x] [P0-SP5-004] Cap'n Proto toolchain and go-capnp API spike [FEAT-177, FEAT-120] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-004]
   Needs: P0-F-002, P0-F-006
   Files: spikes/capnp/schema/handshake.capnp, spikes/capnp/schema/clipboard.capnp, spikes/capnp/gen.sh, spikes/capnp/gen/ (generated), spikes/capnp/roundtrip_test.go, spikes/capnp/limits_test.go, spikes/capnp/fuzz_test.go, spikes/capnp/bench_test.go, spikes/capnp/README.md
   Tests: TestRoundTrip_Hello, TestRoundTrip_ClipAnnounce, TestLimits_TraversalBombRejected, TestLimits_DepthLimitRejected, TestLimits_OversizedMessageRejected, FuzzDecodeHello (30 s), BenchmarkEncodeHello/BenchmarkDecodeClipAnnounce (allocs/op reported)
