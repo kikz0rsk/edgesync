@@ -388,9 +388,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestRFC9382_VectorsP256SHA256 (every vector in RFC 9382 Appendix B for P-256 reproduced byte for byte), TestSPAKE2_WrongPasswordFailsConfirmation, TestSPAKE2_RejectsIdentityAndOffCurvePoints, TestExporter_BindingDiffersPerConnection (TLS 1.3 loopback), BenchmarkSPAKE2Full
   DoD: spike gates green; uses filippo.io/nistec v0.0.4; RFC text cited by section; commit `spike(crypto): SPAKE2 RFC 9382 feasibility [FEAT-177]`
 
-- [ ] [P0-SP5-006] Agent IPC transport spike (named pipe + unix socket peer credentials) [FEAT-177, FEAT-132] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-006]
+- [x] [P0-SP5-006] Agent IPC transport spike (named pipe + unix socket peer credentials) [FEAT-177, FEAT-132] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-006]
   Needs: P0-F-005
   Files: spikes/ipc/pipe_windows.go, spikes/ipc/pipe_windows_test.go, spikes/ipc/sock_unix.go, spikes/ipc/sock_unix_test.go, spikes/ipc/README.md
+  <!-- NOTE: 2026-10-30 - Files extended (approved): spikes/ipc/sock_linux.go (SO_PEERCRED via unix.GetsockoptUcred) and spikes/ipc/sock_darwin.go (LOCAL_PEERCRED via unix.GetsockoptXucred), a per-OS split like the quicbench clock files. -->
   Tests: TestPipe_OwnerOnlySDDL, TestPipe_RoundTripLatency1KiB (host, local pipe); TestSock_PeerCredMatchesUID (linux/darwin, compile-checked on host via cross vet, run in the spikes workflow)
   DoD: spike gates green incl. cross vet; commit `spike(ipc): pipe and socket peer verification [FEAT-177]`
 
