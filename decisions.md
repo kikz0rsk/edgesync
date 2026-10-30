@@ -885,3 +885,20 @@ One decision per answer (Q-NN -> D-(111+NN)). Superseded text stays in place and
 - Alternatives considered: keep the deprecated key (noise, and the key can be removed in a later v2 release; rejected).
 - Amends D-55 (the extra-rules setting only). Implemented by P0-F-011.
 - Source: orchestrator verification of the P0-F-007 result.
+
+### D-123 - Windows latency measurement uses QueryPerformanceCounter (2026-10-30; locked by orchestrator - user to review)
+- Decision: every latency or timing measurement below one millisecond on Windows (benchmarks, spikes, diagnostics counters, hook callback
+  timing) reads `QueryPerformanceCounter` (100 ns ticks on the dev host), never `time.Now` or `time.Since`. A small clock abstraction per
+  package (`clock_windows.go` with `x/sys/windows` or a lazy `kernel32` proc, `clock_other.go` with `time.Now`) provides it. Applies to
+  PB-01, PB-03 and every other sub-millisecond budget in `perf-budgets.md`, and to the P1-C1 loopback bench items.
+- Evidence: P0-SP5-002 reported and the orchestrator reproduced it on 2026-10-30 (scratch probe outside the repo, 2,000,000 back-to-back
+  `time.Now` reads on the Windows 11 dev host): 17 distinct non-zero deltas, the smallest about 504 microseconds; the same probe with
+  `QueryPerformanceCounter` yields 100 ns ticks. Loopback one-way latency is far below the `time.Now` step, so every sub-millisecond
+  percentile taken with it is a clock artifact. P0-SP1-001 already uses QPC.
+- Consequence for production code: anything paced or timed at 1 ms granularity on Windows (1000 Hz motion coalescing, send pacing) must not
+  assume sub-millisecond `time.Now` or timer resolution; P1-C1 and P2-W1 verify the pacing primitive they use. Item text is unchanged;
+  P0-SP5-002 gets `clock_windows.go` and `clock_other.go` in its Files (approved in chat by the orchestrator, recorded in the item NOTE).
+- Alternatives considered: accept `time.Now` numbers with a caveat (rejected: the numbers would be false), measure only on the LAN with
+  user-run binaries (rejected: loopback numbers separate transport cost from network cost and are the only agent-runnable evidence).
+- Source: orchestrator verification of the P0-SP5-002 report.
+

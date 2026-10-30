@@ -324,6 +324,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
 - [ ] [P0-SP5-002] quic-go latency and priority bench with TCP comparison [FEAT-177, FEAT-117, FEAT-118, FEAT-170] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-002]
   Needs: P0-F-005
   Files: spikes/quicbench/peer.go, spikes/quicbench/bench_test.go, spikes/quicbench/cmd/quicbench/main.go, spikes/quicbench/README.md
+  <!-- NOTE: 2026-10-30 - D-123: Files extended by spikes/quicbench/clock_windows.go and spikes/quicbench/clock_other.go (QueryPerformanceCounter clock; time.Now is too coarse on Windows). -->
   Tests (host, loopback unicast only): TestDatagramLatency_Idle, TestDatagramLatency_UnderBulk (urgency 7 stream saturating), TestInputStreamLatency_UnderBulk (urgency 0 small frames), TestTCPFallbackLatency_UnderBulk (two TLS connections); each logs p50/p99/max over 10 s at 1000 Hz; cmd/quicbench provides an echo-based LAN mode for the user's two PCs
   DoD: spike gates green; numbers copied into README; uses quic-go v0.64.1; commit `spike(net): QUIC datagram and priority latency bench [FEAT-177]`
 
