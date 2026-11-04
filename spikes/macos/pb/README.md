@@ -49,6 +49,7 @@ The full `go test -v` output and the output of the four `pb` modes. Look for the
 - the `types on the pasteboard after the write` list (AppKit may add synthesised types);
 - whether a read blocks without a run loop (the test fails with "no answer within 10s" if it does);
 - the `pasteboardFinishedWithDataProvider:` call count after `clearContents`;
+- the line `NSFilePromiseProviderDelegate conformance: declared|omitted`: the first CI run showed `objc_getProtocol` returning nil for this protocol (Apple: `NSProtocolFromString` returns nil if no protocol of that name is currently loaded), so `NewPromise` now asks `NSProtocolFromString` and registers the delegate class without a conformance declaration when that is nil too (the selectors are implemented either way); `omitted` means the protocol was still not loaded;
 - the line `NSFilePromiseReceiver fulfilled the promise in-process` or `OBSERVED: in-process NSFilePromiseReceiver path did not fulfil the promise`.
 
 ## Evidence level
