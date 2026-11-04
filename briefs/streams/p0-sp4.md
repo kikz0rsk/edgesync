@@ -95,8 +95,12 @@ whose thread has ended, and make close race-free; handle the two notifications i
 must be verified against Apple documentation (CFRunLoopStop, CFRunLoopWakeUp, CFMachPortInvalidate lifetime rules).
 
 ## Item P0-SP4-012
-Evidence: finding 3: "Watch reported change count 0, want at least 13" although the baseline read 13. Read `spikes/macos/pb/pasteboard_darwin.go` (the poller and the NSInteger binding) and fix
-the value that is reported; keep the 500 ms interval of D-86.
+Corrected 2026-11-04 (supersedes the first text): the CI log shows `change count: before clear 12, baseline 13, after write 13` and `Watch reported change count 0`. The poller
+(`Pasteboard.Watch`: report whenever `changeCount` differs from the last value, starting from `since`) is correct. The count did not change because on macOS `changeCount`
+increments when pasteboard ownership changes (`clearContents`, `declareTypes:owner:`), not when `setData:forType:` adds data after the clear. The test starts watching after `Clear()` at the
+baseline and then only writes, so there is nothing for Watch to report. Fix the TEST: start Watch at the current count, THEN call `Clear()` (the count must increase), then `SetData`; assert Watch reports a
+value greater than the starting count within the timeout; also assert (and log) that `SetData` alone does not change the count, so the behaviour is documented by the test. Verify the ownership-change rule
+against Apple documentation (NSPasteboard changeCount, clearContents, declareTypes:owner:; cite it) and add one README line to `spikes/macos/pb/README.md`. Touch `pasteboard_darwin.go` only if you find a real defect (say which).
 
 ## Item P0-SP4-013
 Evidence: finding 4: `NSFilePromiseProviderDelegate: Objective-C protocol not found`. Read how `spikes/macos/pb/promise_darwin.go` declares conformance when registering the delegate class

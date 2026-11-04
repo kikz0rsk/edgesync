@@ -386,6 +386,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Needs: P0-SP4-004
   Files: spikes/macos/pb/pasteboard_darwin.go, spikes/macos/pb/pb_integration_test.go
   Tests: the poller (D-86 interval 500 ms) reports the current `changeCount` as an integer of the right width on the first sample and on every change; `TestPasteboard_ChangeCountPolling` expects at least the baseline value observed after `clearContents`; a pure host test covers the sample-to-event logic if it can be separated from the AppKit call
+  <!-- NOTE: 2026-11-04 - Diagnosis corrected by the orchestrator after reading the code: the poller is right; the test's premise was wrong (macOS bumps changeCount on ownership changes: clearContents / declareTypes, not on setData:forType:). The fix is to the TEST (start Watch, THEN call Clear so the count moves, then SetData) plus a README line; Files unchanged; the pasteboard_darwin.go poller stays as is unless the agent finds a real defect. A first agent exited without doing the item (no worktree, no commit); re-dispatched at the same tier. -->
   DoD: compile-only locally; evidence is the next CI dispatch; commit `fix(spike): pasteboard poller change count [FEAT-177]`
 - [ ] [P0-SP4-013] macOS file promise delegate without a runtime protocol lookup that fails [FEAT-177, FEAT-107] [tier:sonnet why:ObjC runtime protocol registration semantics in purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-013]
   Needs: P0-SP4-004

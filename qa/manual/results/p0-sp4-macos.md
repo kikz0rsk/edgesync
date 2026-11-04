@@ -39,9 +39,12 @@ execution on a Mac.
    reenabled 0 -> 2", "user input: disable counter 1 -> 3, want +1", "reenabled 2 -> 4"): the disabled-by-timeout and disabled-by-user-input
    notifications are delivered twice per injected event (or the harness injects both paths twice). The M1 backend must treat these notifications as
    idempotent and must not read `CGEventTapIsEnabled` immediately after `CGEventTapEnable(false)`. Fix item P0-SP4-011.
-3. **Pasteboard change-count poller reports 0** (`TestPasteboard_ChangeCountPolling`): "change count: before clear 12, baseline 13, after write 13"
-   but "Watch reported change count 0, want at least 13": the poll loop's value is wrong (a type/width or first-sample bug in the spike's
-   poller), so lazy-paste change detection is unproven. Fix item P0-SP4-012.
+3. **Pasteboard change-count test premise was wrong (corrected 2026-11-04)** (`TestPasteboard_ChangeCountPolling`): "change count: before clear 12,
+   baseline 13, after write 13" then "Watch reported change count 0, want at least 13". The first diagnosis here ("a bug in the spike's poller") was wrong:
+   `Watch` reports a value only when `changeCount` differs from the value it started with, and the count did not change because on macOS it increments when
+   pasteboard OWNERSHIP changes (`clearContents`, `declareTypes:owner:`), not when `setData:forType:` adds data afterwards (13 before and 13 after the write).
+   The poller is correct; the test started watching after the clear and expected the write to bump the count. Fix item P0-SP4-012 (test, and a README line:
+   change detection fires on ownership changes, which is what every copying application performs).
 4. **File promises could not start** (`TestPromise_ProviderRegistersAndWritesFile`): `NewPromise: NSFilePromiseProviderDelegate: Objective-C
    protocol not found`. The runtime protocol lookup returned nothing (the protocol object is not registered until something references it), so
    the file-promise path (D-11, P4-F3) is unproven. Fix item P0-SP4-013.
