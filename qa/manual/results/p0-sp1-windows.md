@@ -28,14 +28,14 @@ Observations:
 - Real edges computed: monitor 0 left/top/bottom, monitor 1 right/top/bottom; the shared seam at x=0 is correctly not an edge.
 - Absolute probes at both monitors' corners and centres: worst error 1 px (read back with GetCursorPos).
 - SendInput cost per call: mean about 0.26 ms (typing about 0.5 ms), quantised to Go's 0.5 ms time.Now step on Windows (D-123): treat as an upper bound, not a measurement.
-- Whether the typed text, wheel and X-button events reached the intended window is NOT verified (see the incident below).
+- The user confirmed afterwards that the typed text reached Notepad correctly (they closed it before the orchestrator could look). Wheel and X-button delivery was not separately confirmed.
 
 ### winpipe (TLS 1.3 handshake whose private-key operation is done by a signing proxy over a user-owned named pipe)
 
 - Same account: 10 of 10 handshakes succeeded, TLS version 0x304. Median handshake 0.516 ms with a local key versus 1.028 ms through the proxy (overhead 0.511 ms). Both medians sit on Go's coarse Windows clock steps (0.5 ms; D-123), so the overhead is indicative only. Server log: serving pipe `\\.\pipe\EdgeSyncWinpipeSpike` for the current user's SID, session 1; "client disconnected cleanly" per client.
 - Wrong server SID (`-server-sid S-1-5-18`): refused by the client with `pipe server runs as another account: got <own SID>, want S-1-5-18` (exit 1), as designed.
 
-## Incident during the runs (disclosed)
+## Incident during the runs (disclosed; resolved by the user's confirmation below)
 
 wininject sends keystrokes, wheel and mouse-button events to whichever window has focus. I opened Notepad with `Start-Process notepad.exe` and focused it with `AppActivate` on the launcher PID. On Windows 11 the launcher PID is not the real Notepad process, so focus was never verified. The new Notepad also restored an existing tab (a `.ovpn` file of yours). Afterwards Notepad's saved tab state was 62 bytes with no injected text, so nothing of mine was kept as an unsaved edit there, but the keystrokes (`edgesync 1234567890`, arrows, Enter, Escape, numpad Enter, Right Ctrl, wheel, XBUTTON1/XBUTTON2) may have landed in another window during three runs of about 30 seconds each. If any window changed unexpectedly around 18:26 to 18:29 local time, that was this. Rule added (D-126 limit (e), plan.md NOTE): injection runs only into a window whose handle I created and whose foreground state I verified with `GetForegroundWindow` before the first event, aborting otherwise.
 
@@ -46,3 +46,5 @@ wininject sends keystrokes, wheel and mouse-button events to whichever window ha
 3. winsvc (SYSTEM service, helper, desktop following, SendSAS): elevated PowerShell, follow `spikes\winsvc\README.md`, including the WARNING, `-Inject`, the opt-in `-EnableSasPolicy`, recovery and `uninstall.ps1`.
 4. winpipe: a second Windows account running `pipeclient.exe` must be refused at dial.
 5. wininject: confirm on the screen that the typed text, wheel and X-button events reach a focused scratch window (the orchestrator will rerun this only with a verified foreground window if you ask).
+
+Update 2026-11-04: the user stated that the keystrokes landed in Notepad correctly. The earlier worry that they went to another window did not materialise; D-127 stays as the standing rule for future injecting runs.

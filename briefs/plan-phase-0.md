@@ -266,7 +266,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate (user run): XDND source and target between the spike and a file manager inside Xephyr; on GNOME Wayland, candidates for the switch indicator (Notification portal `AddNotification`, an undecorated Gio window) with observed placement/stacking; whether an InputCapture activation occurs while a drag is in progress; whether a Gio window on Wayland can accept file drops (via Gio APIs or its view handles); README contains the written analysis of Wayland incoming-drag initiation (implicit grab serial requirement) with citations
   DoD: spike gates green for the non-cgo parts; the Gio Linux spike builds on the GNOME box per README; commit `spike(linux): DnD, GNOME indicator and Gio drop feasibility [FEAT-177]`
 
-- [ ] [P0-SP3-008] Manual script for SP3 [FEAT-177] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-008]
+- [x] [P0-SP3-008] Manual script for SP3 [FEAT-177] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-008]
   Needs: P0-SP3-002, P0-SP3-003, P0-SP3-004, P0-SP3-005, P0-SP3-006, P0-SP3-007
   Files: qa/manual/p0-sp3-linux.md
   Tests: script follows `qa/manual/README.md`; includes GNOME box preparation (Go 1.27.3 install, packages for Xephyr/Xvfb and Gio build deps, GNOME and xdg-desktop-portal versions to record), every spike's steps, expected observations and paste-back outputs; the X11 integration tests can run locally under Xvfb or via the spikes workflow
