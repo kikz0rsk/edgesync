@@ -31,6 +31,12 @@ Offered payloads:
 
 The sample file is `out/wlclip-sample.txt` (absolute path resolved at start).
 
+`x-special/gnome-copied-files` is `copy` or `cut`, LF, then the `file://` URIs joined by LF with no trailing LF; the
+`text/uri-list` lines stay CRLF-terminated (RFC 2483). The reason is that Nautilus splits the payload on LF and rejects an
+empty line (`src/nautilus-clipboard.c`, `nautilus_clipboard_from_string`, GNOME/nautilus `main`, read 2026-11-04; the
+same source as `../filepaste/README.md`). The encoders are `portal.CopiedFilesPayload` and `portal.URIListPayload`
+(`../../portal/payload.go`), tested in `../../portal/clipboard_test.go`.
+
 ## Sources (cited)
 
 Every method, signature, option key and signal below was checked against the portal interface definitions:

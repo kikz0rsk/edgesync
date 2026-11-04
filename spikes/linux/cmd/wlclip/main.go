@@ -18,7 +18,6 @@ import (
 	"io"
 	"io/fs"
 	"log/slog"
-	"net/url"
 	"os"
 	"os/signal"
 	"path/filepath"
@@ -383,16 +382,12 @@ func payload(mime, sample string) ([]byte, error) {
 	case mimePNG:
 		return solidPNG()
 	case mimeURIList:
-		return []byte(sampleURI(sample) + "\r\n"), nil
+		return portal.URIListPayload([]string{sample})
 	case mimeGnomeFiles:
-		return []byte("copy\n" + sampleURI(sample) + "\n"), nil
+		return portal.CopiedFilesPayload("copy", []string{sample})
 	default:
 		return nil, fmt.Errorf("no payload for %q", mime)
 	}
-}
-
-func sampleURI(path string) string {
-	return (&url.URL{Scheme: "file", Path: path}).String()
 }
 
 func solidPNG() ([]byte, error) {
