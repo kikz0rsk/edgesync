@@ -8,10 +8,13 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"errors"
+	"fmt"
 	"io"
 	"net"
+	"strings"
 	"testing"
 	"time"
+	"unsafe"
 
 	"golang.org/x/sys/windows"
 )
@@ -72,10 +75,17 @@ func TestPipe_OwnerOnlySDDL(t *testing.T) {
 	if err != nil {
 		t.Fatalf("read pipe DACL: %v", err)
 	}
+	actual, err := summarizeDACL(actualSD)
+	if err != nil {
+		t.Fatalf("parse pipe DACL: %v", err)
+	}
 	// The kernel stores the GA of the requested SDDL as FILE_ALL_ACCESS (FA) on a pipe.
-	storedDACL := "D:P(A;;FA;;;SY)(A;;FA;;;" + sid + ")"
-	if got := actualSD.String(); got != storedDACL {
-		t.Errorf("pipe DACL = %q, want %q", got, storedDACL)
+	want, err := summarizeSDDL("D:P(A;;FA;;;S-1-5-18)(A;;FA;;;" + sid + ")")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !sameDACL(actual, want) {
+		t.Errorf("pipe DACL = %v, want %v", actual, want)
 	}
 
 	if err := verifyServerUser(client, "S-1-0-0"); !errors.Is(err, ErrServerIdentity) {
@@ -178,4 +188,116 @@ func uniquePipePath(tb testing.TB) string {
 		tb.Fatal(err)
 	}
 	return `\\.\pipe\edgesync-spike-ipc-` + hex.EncodeToString(suffix[:])
+}
+
+type daclEntry struct {
+	mask uint32
+	sid  *windows.SID
+}
+
+type daclSummary struct {
+	protected bool
+	allow     []daclEntry
+}
+
+func (s daclSummary) String() string {
+	var b strings.Builder
+	fmt.Fprintf(&b, "protected=%t", s.protected)
+	for _, e := range s.allow {
+		fmt.Fprintf(&b, " allow(0x%X, %s)", e.mask, e.sid.String())
+	}
+	return b.String()
+}
+
+// summarizeDACL compares SIDs as binary values: Windows renders well-known accounts such as the local
+// Administrator as SDDL aliases (LA) in SDDL text, so text comparison is not reliable.
+func summarizeDACL(sd *windows.SECURITY_DESCRIPTOR) (daclSummary, error) {
+	control, _, err := sd.Control()
+	if err != nil {
+		return daclSummary{}, fmt.Errorf("read security descriptor control: %w", err)
+	}
+	dacl, _, err := sd.DACL()
+	if err != nil {
+		return daclSummary{}, fmt.Errorf("read DACL: %w", err)
+	}
+	if dacl == nil {
+		return daclSummary{}, errors.New("security descriptor has a NULL DACL")
+	}
+	s := daclSummary{protected: control&windows.SE_DACL_PROTECTED != 0}
+	for i := range uint32(dacl.AceCount) {
+		var ace *windows.ACCESS_ALLOWED_ACE
+		if err := windows.GetAce(dacl, i, &ace); err != nil {
+			return daclSummary{}, fmt.Errorf("read ACE %d: %w", i, err)
+		}
+		if ace.Header.AceType != windows.ACCESS_ALLOWED_ACE_TYPE {
+			return daclSummary{}, fmt.Errorf("ACE %d has type %d, want an allow ACE", i, ace.Header.AceType)
+		}
+		s.allow = append(s.allow, daclEntry{
+			mask: uint32(ace.Mask),
+			sid:  (*windows.SID)(unsafe.Pointer(&ace.SidStart)),
+		})
+	}
+	return s, nil
+}
+
+func summarizeSDDL(sddl string) (daclSummary, error) {
+	sd, err := windows.SecurityDescriptorFromString(sddl)
+	if err != nil {
+		return daclSummary{}, fmt.Errorf("parse %q: %w", sddl, err)
+	}
+	return summarizeDACL(sd)
+}
+
+// sameDACL ignores ACE order. Equal lengths and a one-to-one match make it a set equality.
+func sameDACL(a, b daclSummary) bool {
+	if a.protected != b.protected || len(a.allow) != len(b.allow) {
+		return false
+	}
+	matched := make([]bool, len(b.allow))
+	for _, ea := range a.allow {
+		found := false
+		for j, eb := range b.allow {
+			if !matched[j] && ea.mask == eb.mask && ea.sid.Equals(eb.sid) {
+				matched[j] = true
+				found = true
+				break
+			}
+		}
+		if !found {
+			return false
+		}
+	}
+	return true
+}
+
+// SY (S-1-5-18) and BA (S-1-5-32-544) have fixed SIDs. LA is domain-relative RID 500 of the local
+// account domain, so it cannot be compared against a synthetic SID on another machine.
+func TestDACLSameDACL(t *testing.T) {
+	tests := []struct {
+		name string
+		a, b string
+		want bool
+	}{
+		{"alias and SID render equal", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:P(A;;FA;;;S-1-5-18)(A;;FA;;;S-1-5-32-544)", true},
+		{"ACE order ignored", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:P(A;;FA;;;BA)(A;;FA;;;SY)", true},
+		{"different SID", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:P(A;;FA;;;SY)(A;;FA;;;S-1-5-32-545)", false},
+		{"different mask", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:P(A;;GA;;;SY)(A;;FA;;;BA)", false},
+		{"not protected", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:(A;;FA;;;SY)(A;;FA;;;BA)", false},
+		{"extra ACE", "D:P(A;;FA;;;SY)(A;;FA;;;BA)", "D:P(A;;FA;;;SY)(A;;FA;;;BA)(A;;FA;;;BU)", false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			a, err := summarizeSDDL(tc.a)
+			if err != nil {
+				t.Fatal(err)
+			}
+			b, err := summarizeSDDL(tc.b)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got := sameDACL(a, b); got != tc.want {
+				t.Errorf("sameDACL(%v, %v) = %t, want %t", a, b, got, tc.want)
+			}
+		})
+	}
 }
