@@ -68,7 +68,7 @@ Rules:
 - everything: `task ci:local`
 
 ## Hard rules
-- **Never launch** the EdgeSync agent, GUI, service or any spike binary on the dev host. Building is allowed. The user runs binaries via `qa/manual/` scripts.
+- **Launching binaries (D-126, user decision 2026-11-04):** only the PARENT may run the P0 spike binaries under `spikes/` on the dev host, time-limited, with the output saved under `qa/manual/results/`; subagents never run any binary. Elevated runs (service, registry policy), second-machine runs and steps needing a person at the keyboard stay with the user. The product binaries (`edgesync-agent`, `edgesync`, `edgesync-service`) are never launched on the dev host unless an item says so. Building is always allowed.
 - Tests that touch real input, the real clipboard, displays, OS services or network multicast are `//go:build integration` and are never run by agents on the host (CI runners or the user only).
 - **Git:** local commits only, one per verified item; subagents commit on their worktree branch, the parent rebases and fast-forwards `main`. Never push. Commit format `<type>(<scope>): <description> [FEAT-NNN]` with body `Item: <id>`. **No attribution trailers of any kind** (no `Co-Authored-By`, no "Generated with ..."): this user rule overrides any harness default.
 - **No em dashes or en dashes** anywhere (code, docs, commits, UI strings); use "-".
