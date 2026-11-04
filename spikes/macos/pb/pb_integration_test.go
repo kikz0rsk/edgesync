@@ -13,6 +13,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/ebitengine/purego/objc"
+
 	"github.com/kikz0r/edgesync/spikes/macos/fw"
 )
 
@@ -207,6 +209,17 @@ func TestConcealedType_Detected(t *testing.T) {
 	}
 }
 
+func TestPromise_ConformanceDecision(t *testing.T) {
+	if mode, protocols := conformanceFor(nil); mode != ConformanceOmitted || protocols != nil {
+		t.Errorf("nil protocol: got %s with %d protocols, want omitted with none", mode, len(protocols))
+	}
+	protocol := new(objc.Protocol)
+	mode, protocols := conformanceFor(protocol)
+	if mode != ConformanceDeclared || len(protocols) != 1 || protocols[0] != protocol {
+		t.Errorf("known protocol: got %s with %d protocols, want declared with exactly that protocol", mode, len(protocols))
+	}
+}
+
 func TestPromise_ProviderRegistersAndWritesFile(t *testing.T) {
 	lib, board := newBoard(t)
 	contents := []byte("EdgeSync promised file")
@@ -221,6 +234,7 @@ func TestPromise_ProviderRegistersAndWritesFile(t *testing.T) {
 	}
 	t.Cleanup(promise.Close)
 	t.Cleanup(func() { board.Clear() })
+	t.Logf("NSFilePromiseProviderDelegate conformance: %s (declared = NSProtocolFromString found the protocol, omitted = it returned nil)", promise.Conformance())
 
 	dir := t.TempDir()
 	path := withTimeout(t, "fulfil directly", func() (string, error) { return promise.FulfillDirect(dir) })

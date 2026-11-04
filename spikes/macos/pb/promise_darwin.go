@@ -25,9 +25,28 @@ const PromiseFileType = "public.data"
 const blockInvokeOffset = 16
 
 const (
-	errorDomain = "io.github.kikz0r.edgesync.spike"
-	errorCode   = 1
+	errorDomain          = "io.github.kikz0r.edgesync.spike"
+	errorCode            = 1
+	delegateProtocolName = "NSFilePromiseProviderDelegate"
 )
+
+type Conformance int
+
+const (
+	ConformanceDeclared Conformance = iota
+	ConformanceOmitted
+)
+
+func (c Conformance) String() string {
+	switch c {
+	case ConformanceDeclared:
+		return "declared"
+	case ConformanceOmitted:
+		return "omitted"
+	default:
+		return fmt.Sprintf("Conformance(%d)", int(c))
+	}
+}
 
 var (
 	ErrNoPromise           = errors.New("pasteboard holds no file promise")
@@ -51,6 +70,8 @@ type Promise struct {
 	delegate objc.ID
 	provider objc.ID
 
+	conformance Conformance
+
 	mu           sync.Mutex
 	nameRequests int
 	written      []string
@@ -65,12 +86,13 @@ func NewPromise(lib *fw.Lib, cfg PromiseConfig) (*Promise, error) {
 	if err != nil {
 		return nil, err
 	}
-	protocol := objc.GetProtocol("NSFilePromiseProviderDelegate")
-	if protocol == nil {
-		return nil, fmt.Errorf("NSFilePromiseProviderDelegate: %w", ErrProtocolNotFound)
+	protocol, err := k.protocolFromString(lib, delegateProtocolName)
+	if err != nil {
+		return nil, fmt.Errorf("look up %s: %w", delegateProtocolName, err)
 	}
-	pr := &Promise{kit: k, cfg: cfg}
-	class, err := objc.RegisterClass(cfg.ClassName, objc.GetClass("NSObject"), []*objc.Protocol{protocol}, nil, []objc.MethodDef{
+	conformance, protocols := conformanceFor(protocol)
+	pr := &Promise{kit: k, cfg: cfg, conformance: conformance}
+	class, err := objc.RegisterClass(cfg.ClassName, objc.GetClass("NSObject"), protocols, nil, []objc.MethodDef{
 		{Cmd: k.sel.fileNameForType, Fn: pr.fileNameForType},
 		{Cmd: k.sel.writePromise, Fn: pr.writePromise},
 	})
@@ -96,6 +118,41 @@ func NewPromise(lib *fw.Lib, cfg PromiseConfig) (*Promise, error) {
 		return nil, fmt.Errorf("initWithFileType:delegate: %s: %w", cfg.FileType, ErrProviderRejected)
 	}
 	return pr, nil
+}
+
+// Conformance reports whether the delegate class declares NSFilePromiseProviderDelegate or only implements its selectors.
+func (p *Promise) Conformance() Conformance {
+	return p.conformance
+}
+
+// protocolFromString calls Foundation's NSProtocolFromString, which returns nil (not an error) while the runtime has
+// not loaded a protocol of that name; only a failure to reach the function is an error.
+func (k *kit) protocolFromString(lib *fw.Lib, name string) (*objc.Protocol, error) {
+	symbol, err := purego.Dlsym(lib.Handles.Foundation, "NSProtocolFromString")
+	if err != nil {
+		return nil, fmt.Errorf("resolve NSProtocolFromString: %w", err)
+	}
+	var lookup func(name objc.ID) uintptr
+	purego.RegisterFunc(&lookup, symbol)
+	var protocol *objc.Protocol
+	err = k.inPool(func() error {
+		nameString, err := fw.NSString(name)
+		if err != nil {
+			return err
+		}
+		protocol = (*objc.Protocol)(pointerFrom(lookup(nameString)))
+		return nil
+	})
+	return protocol, err
+}
+
+// conformanceFor decides how the delegate class is registered: with the protocol when the runtime knows it, and
+// without a conformance declaration when it does not. The selectors are implemented in both cases.
+func conformanceFor(protocol *objc.Protocol) (Conformance, []*objc.Protocol) {
+	if protocol == nil {
+		return ConformanceOmitted, nil
+	}
+	return ConformanceDeclared, []*objc.Protocol{protocol}
 }
 
 // Close releases the provider and the delegate; clear the pasteboard first.
@@ -136,7 +193,7 @@ func (p *Promise) fail(err error) {
 	p.errs = append(p.errs, err)
 }
 
-func (p *Promise) fileNameForType(_ objc.ID, _ objc.SEL, _ objc.ID, _ objc.ID) objc.ID {
+func (p *Promise) fileNameForType(_ objc.ID, _ objc.SEL, _, _ objc.ID) objc.ID {
 	p.mu.Lock()
 	p.nameRequests++
 	p.mu.Unlock()
@@ -148,7 +205,7 @@ func (p *Promise) fileNameForType(_ objc.ID, _ objc.SEL, _ objc.ID, _ objc.ID) o
 	return name
 }
 
-func (p *Promise) writePromise(_ objc.ID, _ objc.SEL, _ objc.ID, url objc.ID, completion objc.ID) {
+func (p *Promise) writePromise(_ objc.ID, _ objc.SEL, _, url, completion objc.ID) {
 	failure := p.writeFile(url)
 	if failure != nil {
 		p.fail(failure)
@@ -207,7 +264,7 @@ func (p *Promise) nsError(failure error) (objc.ID, error) {
 	return objc.ID(p.kit.nsError).Send(p.kit.sel.errorWithDomainCodeUserInfo, domain, errorCode, userInfo), nil
 }
 
-func invokeBlock(block objc.ID, arg objc.ID) {
+func invokeBlock(block, arg objc.ID) {
 	invoke := *(*uintptr)(unsafe.Add(pointerFrom(uintptr(block)), blockInvokeOffset))
 	purego.SyscallN(invoke, uintptr(block), uintptr(arg))
 }
@@ -303,7 +360,7 @@ func ReceivePromised(ctx context.Context, board *Pasteboard, dir string) ([]stri
 		queue := objc.ID(k.nsOperationQueue).Send(k.sel.new)
 
 		results := make(chan promisedFile, expected)
-		block := objc.NewBlock(func(_ objc.Block, fileURL objc.ID, failure objc.ID) {
+		block := objc.NewBlock(func(_ objc.Block, fileURL, failure objc.ID) {
 			results <- k.promisedFileFrom(fileURL, failure)
 		})
 		for i := range count {
@@ -327,7 +384,7 @@ func ReceivePromised(ctx context.Context, board *Pasteboard, dir string) ([]stri
 	return received, err
 }
 
-func (k *kit) promisedFileFrom(fileURL objc.ID, failure objc.ID) promisedFile {
+func (k *kit) promisedFileFrom(fileURL, failure objc.ID) promisedFile {
 	var result promisedFile
 	err := k.inPool(func() error {
 		if failure != 0 {
