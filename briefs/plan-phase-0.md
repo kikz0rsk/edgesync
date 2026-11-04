@@ -290,9 +290,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: covers EI codec, InputCapture (zones, barriers, activation, release, recreation, restore tokens), RemoteDesktop injection, portal clipboard and session-activity dependence, X11 capture/injection/selections, XI2 generation, lazy file paste mechanism recommendation for X11 and Wayland, XDND, Wayland DnD limits, GNOME switch indicator, Gio Linux drop, guard semantics under barrier activation; each with go/no-go and the decision it confirms or contradicts (D-02, D-05, D-11, D-12, D-18, D-39)
   DoD: contradictions listed under "Requires user decision"; commit `docs(spikes): SP3 findings [FEAT-177]`
 
-- [ ] [P0-SP3-010] wlclip gnome-copied-files payload without trailing LF [FEAT-177, FEAT-110] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-010]
+- [x] [P0-SP3-010] wlclip gnome-copied-files payload without trailing LF [FEAT-177, FEAT-110] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-010]
   Needs: P0-SP3-006
   Files: spikes/linux/cmd/wlclip/main.go, spikes/linux/portal/clipboard_test.go
+  <!-- NOTE: 2026-11-04 - Files extended (approved, as the brief allowed): spikes/linux/portal/payload.go (pure encoders FileURI, URIListPayload with CRLF lines, CopiedFilesPayload copy/cut with LF and no trailing LF; sentinels ErrNoPaths, ErrBadCopyOp), extracted because the builder lived in package main; spikes/linux/cmd/wlclip/README.md (the rule, citing src/nautilus-clipboard.c nautilus_clipboard_from_string on GNOME/nautilus main, read 2026-11-04). -->
   Tests: a table test of the wlclip payload builder asserts that `x-special/gnome-copied-files` is `copy\nfile:///...` or `cut\nfile:///...` with entries joined by LF and NO trailing LF, while `text/uri-list` keeps its CRLF-terminated lines; `go -C spikes test ./linux/portal/...` passes; the whole spike tree still builds for linux and darwin (`task spikes:cross`)
   DoD: only the payload encoding changes; the README of wlclip states the rule with the source named in spikes/linux/cmd/filepaste/README.md; commit `fix(spike): wlclip gnome-copied-files without trailing LF [FEAT-177]`
 

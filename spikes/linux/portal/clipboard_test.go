@@ -313,3 +313,56 @@ func TestClipboard_VersionProperty(t *testing.T) {
 		t.Fatalf("Version = %d, %v", v, err)
 	}
 }
+
+func TestCopiedFilesPayload(t *testing.T) {
+	tests := []struct {
+		name  string
+		op    string
+		paths []string
+		want  string
+		err   error
+	}{
+		{name: "one file copy", op: "copy", paths: []string{"/home/u/a.txt"}, want: "copy\nfile:///home/u/a.txt"},
+		{name: "several files copy", op: "copy", paths: []string{"/a/one.txt", "/a/two.txt"}, want: "copy\nfile:///a/one.txt\nfile:///a/two.txt"},
+		{name: "one file cut", op: "cut", paths: []string{"/a/one.txt"}, want: "cut\nfile:///a/one.txt"},
+		{name: "percent-encoded name", op: "copy", paths: []string{"/a/b c%d.txt"}, want: "copy\nfile:///a/b%20c%25d.txt"},
+		{name: "empty list rejected", op: "copy", paths: nil, err: ErrNoPaths},
+		{name: "unknown operation rejected", op: "move", paths: []string{"/a/one.txt"}, err: ErrBadCopyOp},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := CopiedFilesPayload(tt.op, tt.paths)
+			if !errors.Is(err, tt.err) {
+				t.Fatalf("CopiedFilesPayload error = %v, want %v", err, tt.err)
+			}
+			if string(got) != tt.want {
+				t.Errorf("CopiedFilesPayload = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestURIListPayload(t *testing.T) {
+	tests := []struct {
+		name  string
+		paths []string
+		want  string
+		err   error
+	}{
+		{name: "one file", paths: []string{"/a/one.txt"}, want: "file:///a/one.txt\r\n"},
+		{name: "several files", paths: []string{"/a/one.txt", "/a/two.txt"}, want: "file:///a/one.txt\r\nfile:///a/two.txt\r\n"},
+		{name: "percent-encoded name", paths: []string{"/a/b c%d.txt"}, want: "file:///a/b%20c%25d.txt\r\n"},
+		{name: "empty list rejected", paths: nil, err: ErrNoPaths},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := URIListPayload(tt.paths)
+			if !errors.Is(err, tt.err) {
+				t.Fatalf("URIListPayload error = %v, want %v", err, tt.err)
+			}
+			if string(got) != tt.want {
+				t.Errorf("URIListPayload = %q, want %q", got, tt.want)
+			}
+		})
+	}
+}
