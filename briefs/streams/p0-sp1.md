@@ -96,3 +96,9 @@ GOOS=linux and GOOS=darwin (CGO_ENABLED=0), and confirm the windows build and te
 macOS the package is a `package main` without `main` (found by the whole-package cross build while merging P0-SP1-004). Add `spikes/winsvc/helper/main_other.go`
 (`//go:build !windows`, `package main`) with a `main` that writes "windows only" to stderr and exits 2. Do not touch any other file. `spikes/winsvc/service` has only
 windows-tagged files and needs nothing.
+
+## Item P0-SP1-013
+Evidence: `qa/manual/results/p0-sp5-core.md` (Windows runner section). `TestPipe_OwnerOnlySDDL` compares the pipe's DACL as a string with an expected string built from the
+current user's SID. On the GitHub runner the user is the built-in Administrator (RID 500) and Windows renders that SID as the alias `LA` when the descriptor is read back, so the
+strings differ although the DACL is right. Rewrite only the assertion: read the security descriptor, parse the DACL into ACEs and compare SIDs, not text (the spike
+`spikes/winpipe/sddl_windows.go` has a `ParseDACL` you may study but not modify here). Cover the alias case with a pure table test. Do not change the production pipe code.

@@ -35,3 +35,12 @@ Loopback numbers (quicbench), Cap'n Proto limits, SPAKE2 vectors and benchmark, 
 2. quicbench LAN between the two Windows PCs on wired Ethernet, with and without `-bulk`, both role directions.
 3. The Gio layout editor feel test (4 and 64 machines) with your hands on the mouse.
 4. SPAKE2 and capnp regeneration and IPC pipe tests on the second PC and the GNOME box.
+
+## Windows runner evidence (GitHub Actions, spikes workflow job `windows`, run 41880720011)
+
+`go -C spikes test -tags integration ./...` on windows-latest: everything passed, including quicbench (41.06 s, the four latency tests) on a shared
+runner, except `TestPipe_OwnerOnlySDDL` (spikes/ipc): `pipe DACL = "D:P(A;;FA;;;SY)(A;;FA;;;LA)", want "D:P(A;;FA;;;SY)(A;;FA;;;S-1-5-21-...-500)"`.
+The DACL is correct (SYSTEM and the owner account, full control, protected). On the runner the user is the built-in local Administrator (RID 500), and
+Windows prints that SID in its well-known alias form `LA` when the SDDL is read back, so the test's string comparison fails on such an account.
+Finding for the product (D-47, P1-C5, P2-W2): never compare SDDL text; compare parsed ACEs by SID (convert aliases), and expect the aliases `LA`, `LG`,
+`DA` and others when SIDs of built-in accounts are rendered. Fix item P0-SP1-013 (test only).

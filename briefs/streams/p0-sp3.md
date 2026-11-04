@@ -89,3 +89,8 @@ cite it again in the wlclip README). Fix the encoder in `spikes/linux/cmd/wlclip
 the payload builder (if the builder lives in `spikes/linux/portal`, test it in `spikes/linux/portal/clipboard_test.go`). Do not touch any other behaviour. If the builder is not a pure
 function yet, extract exactly that function (no other refactoring) so it can be tested on the host.
 
+## Item P0-SP3-011
+Evidence: `qa/manual/results/p0-sp3-linux.md`. In the linux job of `.github/workflows/spikes.yml`: (1) `TestRandR_MonitorsListed` needs two monitors but the workflow never defines
+them; add the `xrandr --setmonitor` steps after Xvfb starts and print `xrandr --listmonitors`; (2) two XDND integration tests failed with `connect to display "": EOF`, most likely
+because Xvfb resets when its last client disconnects: start it with `-noreset`. Apply the same two lines to the Xvfb instructions in `qa/manual/p0-sp3-linux.md` and
+`spikes/linux/x11/README.md`. The xrandr RandR 1.5 monitor syntax must be verified against the xrandr manual (do not trust memory) and the source recorded in the commit body.

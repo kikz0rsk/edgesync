@@ -87,3 +87,22 @@ any other file.
 `spikes/macos/inject/README.md`. Same purpose and shape as P0-SP4-008 and P0-SP4-009 for `spikes/macos/inject` and `spikes/macos/cmd/inject`
 (found missing when P0-SP4-006 was merged). Read the code and its doc comments (constant provenance is second-source: servo core-graphics bindings,
 Chromium kVK keycodes). Do not edit any other file.
+
+## Item P0-SP4-011
+Evidence: `qa/manual/results/p0-sp4-macos.md` findings 1 and 2 (SIGTRAP in `tap.(*loop).stop` at `runloop_darwin.go:98` from `Tap.Close`; `CGEventTapEnable(false)` not reflected at once;
+disable and re-enable counters +2 where +1 was expected). Read `spikes/macos/tap/runloop_darwin.go` and `tap_darwin.go`, find the window in which `stop()` touches a run loop
+whose thread has ended, and make close race-free; handle the two notifications idempotently; fix the test expectations to what macOS does and document it. CoreFoundation facts
+must be verified against Apple documentation (CFRunLoopStop, CFRunLoopWakeUp, CFMachPortInvalidate lifetime rules).
+
+## Item P0-SP4-012
+Evidence: finding 3: "Watch reported change count 0, want at least 13" although the baseline read 13. Read `spikes/macos/pb/pasteboard_darwin.go` (the poller and the NSInteger binding) and fix
+the value that is reported; keep the 500 ms interval of D-86.
+
+## Item P0-SP4-013
+Evidence: finding 4: `NSFilePromiseProviderDelegate: Objective-C protocol not found`. Read how `spikes/macos/pb/promise_darwin.go` declares conformance when registering the delegate class
+(purego `objc.RegisterClass` with a protocol list) and fix the lookup per the item text; verify `NSProtocolFromString` and the objc package API from sources.
+
+## Item P0-SP4-014
+Evidence: finding 5: `trayoverlay: setActivationPolicy: rejected the accessory policy`, process exits. Read `spikes/macos/ui/app_darwin.go`, `spikes/macos/bundle/Info.plist` (LSUIElement is set) and
+`spikes/macos/cmd/trayoverlay/main.go`; decide from Apple documentation why the call returns NO and fix the cause. If the plist already makes the app an accessory app the explicit call may be
+unnecessary: read the policy back and proceed only when it is accessory.

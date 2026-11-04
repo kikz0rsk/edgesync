@@ -160,6 +160,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL ./winsvc/helper` and `go vet ./winsvc/helper` succeed; `go -C spikes test ./winsvc/...` still passes on windows (geometry tests) and on linux
   DoD: `winsvc/helper/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2; no other file changes; `task spikes:cross` (P0-F-013) exits 0 afterwards; commit `fix(spikes): winsvc helper builds on non-windows [FEAT-177]`
 
+- [ ] [P0-SP1-013] ipc pipe SDDL test compares parsed ACEs, not SDDL text [FEAT-177, FEAT-132] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-013]
+  Needs: P0-SP5-006
+  Files: spikes/ipc/pipe_windows_test.go
+  Tests: `TestPipe_OwnerOnlySDDL` passes on this host AND on an account whose SID has an SDDL alias (the GitHub runner's built-in Administrator renders as `LA`): the test reads the pipe's DACL, parses it to ACEs (type, access mask, SID via `windows.SID` comparison or by resolving both sides with `ConvertStringSidToSid`), and asserts exactly two allow ACEs with full control for SYSTEM and for the current user's SID, protected, no other ACE; a second table case proves the comparison is alias-insensitive by feeding the strings `D:P(A;;FA;;;SY)(A;;FA;;;LA)` and `D:P(A;;FA;;;SY)(A;;FA;;;S-1-5-21-1-2-3-500)` to the helper and expecting equality when the user SID is `S-1-5-21-1-2-3-500`
+  DoD: only the test (and, if needed, a small test helper in the same file) changes; the production SDDL builder is untouched; spikes gates green; commit `fix(spike): ipc SDDL test compares ACEs by SID [FEAT-177]`
+
 ### SP2 - Windows COM shell (virtual files, delayed rendering, OLE drag-and-drop)
 
 - [x] [P0-SP2-001] Pure-Go COM infrastructure: vtables, handle table, STA thread [FEAT-177, FEAT-103] [tier:sonnet why:hand-built COM vtables, reference counting and STA threading in pure Go] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-001]
@@ -297,6 +303,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: a table test of the wlclip payload builder asserts that `x-special/gnome-copied-files` is `copy\nfile:///...` or `cut\nfile:///...` with entries joined by LF and NO trailing LF, while `text/uri-list` keeps its CRLF-terminated lines; `go -C spikes test ./linux/portal/...` passes; the whole spike tree still builds for linux and darwin (`task spikes:cross`)
   DoD: only the payload encoding changes; the README of wlclip states the rule with the source named in spikes/linux/cmd/filepaste/README.md; commit `fix(spike): wlclip gnome-copied-files without trailing LF [FEAT-177]`
 
+- [ ] [P0-SP3-011] spikes workflow: two-monitor Xvfb that does not reset [FEAT-177, FEAT-167] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-011]
+  Needs: P0-F-012
+  Files: .github/workflows/spikes.yml, qa/manual/p0-sp3-linux.md, spikes/linux/x11/README.md
+  Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0; in the linux job the Xvfb command carries `-noreset`, and a step after it defines two monitors with `xrandr --setmonitor` (verify the exact RandR 1.5 syntax `--setmonitor <name> <w>/<mm>x<h>/<mm>+<x>+<y> none` against the xrandr manual page and record the source) and prints `xrandr --listmonitors`; the manual script and the x11 README show the same two-line setup
+  DoD: windows and macos jobs, triggers and action pins untouched; commit `ci(spikes): two-monitor Xvfb with -noreset [FEAT-177]`
+
 ### SP4 - macOS via purego (compile + CI only)
 
 - [x] [P0-SP4-001] purego framework bindings and display enumeration [FEAT-177, FEAT-055] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-001]
@@ -335,7 +347,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: actionlint clean; script tells the user how to push the branch, dispatch the workflow, and which artifacts/logs to share
   DoD: commit `ci(spikes): macOS spike steps and dispatch script [FEAT-177]`
 
-- [ ] [P0-SP4-M01] Push and dispatch the spikes workflow; share the macOS job log and artifacts [FEAT-177] [tier:haiku] [owner:USER] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-m01]
+- [x] [P0-SP4-M01] Push and dispatch the spikes workflow; share the macOS job log and artifacts [FEAT-177] [tier:haiku] [owner:USER] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-m01]
   Needs: P0-SP4-006
   Files: qa/manual/results/p0-sp4-macos.md
   Tests: run URL, test output, screenshots recorded
@@ -364,6 +376,27 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: spikes/macos/inject/README.md
   Tests: the README names the exact build command (`GOOS=darwin GOARCH=arm64 CGO_ENABLED=0 go -C spikes build -o ... ./macos/cmd/inject`), the run command with every flag of `cmd/inject` (read from its source), the permissions needed (Accessibility / Post Event access), what to observe, what to paste back, the "second-source" constant provenance from the doc comments, and the evidence level (compile-checked only, never run by the author)
   DoD: content derived only from the existing code; commit `docs(spikes): macOS event injection README [FEAT-177]`
+
+- [ ] [P0-SP4-011] macOS tap: race-free close and idempotent disable handling [FEAT-177, FEAT-052, FEAT-053] [tier:sonnet why:CFRunLoop lifetime across threads and the observed tap-disable semantics need reasoning] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-011]
+  Needs: P0-SP4-002
+  Files: spikes/macos/tap/runloop_darwin.go, spikes/macos/tap/tap_darwin.go, spikes/macos/tap/tap_integration_test.go
+  Tests: no SIGTRAP when `Tap.Close` races a loop that is already exiting (the stop path never calls CoreFoundation on a run loop reference whose thread has ended: the loop owns a done flag and the reference is released only after the thread exit is observed; Close is idempotent and safe to call from any goroutine); the disabled-by-timeout and disabled-by-user-input notifications are handled idempotently; the integration test no longer reads `CGEventTapIsEnabled` immediately after `CGEventTapEnable(false)` (poll with a bounded timeout) and its counter expectations match the observed behaviour of two notifications per injected event, documented in the test and README; `GOOS=darwin GOARCH=arm64/amd64 CGO_ENABLED=0 go vet/build` with and without `-tags integration` pass
+  DoD: compile-only locally (macOS code cannot run here); the evidence is the next dispatch of the spikes workflow (P0-SP4-M01 rerun by the user); commit `fix(spike): macOS tap race-free close [FEAT-177]`
+- [ ] [P0-SP4-012] macOS pasteboard poller reports the real change count [FEAT-177, FEAT-057] [tier:haiku] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-012]
+  Needs: P0-SP4-004
+  Files: spikes/macos/pb/pasteboard_darwin.go, spikes/macos/pb/pb_integration_test.go
+  Tests: the poller (D-86 interval 500 ms) reports the current `changeCount` as an integer of the right width on the first sample and on every change; `TestPasteboard_ChangeCountPolling` expects at least the baseline value observed after `clearContents`; a pure host test covers the sample-to-event logic if it can be separated from the AppKit call
+  DoD: compile-only locally; evidence is the next CI dispatch; commit `fix(spike): pasteboard poller change count [FEAT-177]`
+- [ ] [P0-SP4-013] macOS file promise delegate without a runtime protocol lookup that fails [FEAT-177, FEAT-107] [tier:sonnet why:ObjC runtime protocol registration semantics in purego] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-013]
+  Needs: P0-SP4-004
+  Files: spikes/macos/pb/promise_darwin.go, spikes/macos/pb/pb_integration_test.go
+  Tests: `NewPromise` no longer fails with "NSFilePromiseProviderDelegate: Objective-C protocol not found": resolve the protocol with `NSProtocolFromString` after AppKit is loaded (verify the API in Apple documentation and the purego objc package source), or register the delegate class without declaring conformance when the runtime lookup returns nil (the selectors the provider calls are still implemented), and record which one worked reasoning from the CI log; `TestPromise_ProviderRegistersAndWritesFile` is unchanged in intent; darwin arm64/amd64 vet/build with and without `-tags integration` pass
+  DoD: compile-only locally; evidence is the next CI dispatch; commit `fix(spike): file promise delegate protocol lookup [FEAT-177]`
+- [ ] [P0-SP4-014] macOS tray/overlay spike survives setActivationPolicy [FEAT-177, FEAT-059, FEAT-060] [tier:sonnet why:AppKit launch and main-thread semantics decide whether the policy call can succeed] [owner:SP4] [brief:briefs/streams/p0-sp4.md#item-p0-sp4-014]
+  Needs: P0-SP4-005
+  Files: spikes/macos/ui/app_darwin.go, spikes/macos/cmd/trayoverlay/main.go
+  Tests: the process no longer exits with "setActivationPolicy: rejected the accessory policy": determine from Apple documentation why `-[NSApplication setActivationPolicy:]` returns NO (call order relative to `sharedApplication` and `finishLaunching`, main thread requirement, the LSUIElement plist key already setting the policy, a policy that is already accessory) and make the code correct for that cause; when the policy is already accessory the call is skipped or its NO is tolerated only if `activationPolicy` reads back as accessory (never swallow a real failure); the stderr line names the observed value; darwin vet/build pass
+  DoD: compile-only locally; evidence is the next CI dispatch (stdout log, screenshot, process exit within the self-test time); commit `fix(spike): trayoverlay activation policy [FEAT-177]`
 
 ### SP5 - Core tech (Gio editor, QUIC, mDNS, Cap'n Proto, SPAKE2, IPC)
 
