@@ -129,7 +129,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestSignerProxy_TLS13HandshakeOverLoopback (server private key only reachable through the proxy), TestPipe_SDDLDeniesOtherSID (constructs the descriptor and checks the ACE list), TestPipe_ClientVerifiesServerSID, TestPipe_FirstInstanceRejectsSecondServer (host, local named pipes); spike must demonstrate (user run): a second Windows account cannot open the pipe; handshake overhead of the proxy in ms
   DoD: spike gates green; uses github.com/Microsoft/go-winio v0.6.4; commit `spike(win): pipe ACLs and TLS signing proxy [FEAT-177]`
 
-- [ ] [P0-SP1-006] Manual script for SP1 [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-006]
+- [x] [P0-SP1-006] Manual script for SP1 [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-006]
   Needs: P0-SP1-001, P0-SP1-002, P0-SP1-003, P0-SP1-004, P0-SP1-005
   Files: qa/manual/p0-sp1-windows.md
   Tests: script follows `qa/manual/README.md` format; every spike README's run steps appear in order with expected observations and the exact output to paste; safety notes (how to stop each spike, how to uninstall the service)
