@@ -193,7 +193,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate (user run): HWND obtained from Gio's Win32 view event; IDropTarget registered on Gio's window thread; dropped paths and the drop point converted to Gio coordinates are shown in the window; no conflict with Gio's own OLE/COM initialisation
   DoD: spike gates green with `CGO_ENABLED=0`; commit `spike(gui): native file drop onto a Gio window on Windows [FEAT-177]`
 
-- [ ] [P0-SP2-006] Manual script for SP2 [FEAT-177] [tier:haiku] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-006]
+- [x] [P0-SP2-006] Manual script for SP2 [FEAT-177] [tier:haiku] [owner:SP2] [brief:briefs/streams/p0-sp2.md#item-p0-sp2-006]
   Needs: P0-SP2-002, P0-SP2-003, P0-SP2-004, P0-SP2-005
   Files: qa/manual/p0-sp2-windows-shell.md
   Tests: script follows `qa/manual/README.md`; every spike's steps, expected observations and paste-back outputs present
