@@ -37,6 +37,7 @@ Integration tests (CI `macos` job, `-tags integration`):
 
 - `TestAppKitTypes_MatchLiterals`: the `NSPasteboardType*` constants read from AppKit equal the spike's `public.*` literals.
 - `TestPasteboard_ChangeCountPolling`: `clearContents` raises the count and the 20 ms poller reports the new value.
+Change detection by polling fires on ownership changes, which every copying application performs; adding data to an already-owned pasteboard without re-declaring does not bump the count.
 - `TestProvider_LazyTextHTMLRTFPNG`: provider called 0 times right after `writeObjects:`, exactly once per type after the first in-process read, content equal to what Go provided; the second-read call count is logged as an observed fact.
 - `TestConcealedType_Detected`: the marker is found when present and absent otherwise.
 - `TestPromise_ProviderRegistersAndWritesFile`: the delegate class registers, answers `fileNameForType:`, writes the file when its write message is sent with a completion block; the `NSFilePromiseReceiver` path is attempted and its outcome logged.
