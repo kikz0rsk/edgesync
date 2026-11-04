@@ -7,7 +7,7 @@ Evidence level: compile-checked only. The author never ran this on a Mac, and no
 ## Packages
 
 - `tap/tap_darwin.go`: `CGEventTapCreate` with a purego callback that is created once per process; the event mask (mouse moved and dragged, left, right and other buttons, scroll wheel, key down and up, flags changed); `CFMachPortCreateRunLoopSource`; the callback re-enables the tap on `kCGEventTapDisabledByTimeout` and `kCGEventTapDisabledByUserInput`, counts the events, and returns NULL for every event while suppression is on.
-- `tap/runloop_darwin.go`: a goroutine locked to its OS thread calls `CFRunLoopGetCurrent`, adds the source in `kCFRunLoopCommonModes`, and runs `CFRunLoopRun`. `Close` calls `CFRunLoopStop` and `CFRunLoopWakeUp` from another goroutine every 10 ms until the loop exits.
+- `tap/runloop.go` (portable, unit-tested on any host with a fake CoreFoundation) and `tap/runloop_darwin.go` (the bindings): a goroutine locked to its OS thread calls `CFRunLoopGetCurrent`, takes its own `CFRetain` reference (Get rule: the thread owns the original), adds the source in `kCFRunLoopCommonModes`, and runs `CFRunLoopRun`. `Close` calls `CFRunLoopStop` and `CFRunLoopWakeUp` every 10 ms until the loop exits, under a mutex that the loop thread also takes to mark itself exited, so no CoreFoundation call reaches a run loop whose thread is ending (the first CI run crashed with SIGTRAP in `CFRunLoopWakeUp` right after `CFRunLoopStop` let the thread exit). The reference is released only after the thread exit is observed; `Close` is idempotent and safe from any goroutine.
 - `tap/permissions_darwin.go`: the permission calls listed under "TCC permission flow" below.
 - `cmd/tap/main.go`: the command line driver (`//go:build darwin`).
 - `tap/tap_integration_test.go`: integration tests (`//go:build integration && darwin`).
@@ -57,7 +57,9 @@ Integration tests (CI `macos` job uses `-tags integration`):
 
     cd spikes && CGO_ENABLED=0 go test -tags integration -v ./macos/tap/
 
-Test names: `TestTap_CreateSessionTapReportsTrustState`, `TestTap_ListenOnlyRejectsSuppression`, `TestPermissions_PromptAndRequestReturnValues`, `TestCursor_AssociateAndHideReturnCodes`.
+Test names: `TestTap_CreateSessionTapReportsTrustState`, `TestTap_ListenOnlyRejectsSuppression`, `TestTap_CloseIsIdempotentAndRaceFree`, `TestPermissions_PromptAndRequestReturnValues`, `TestCursor_AssociateAndHideReturnCodes`.
+
+Disable notifications in the test (observed in the CI run of 2026-11-04): each `CGEventTapEnable(false)` is followed by a second, system-delivered `kCGEventTapDisabledByUserInput` on the loop thread, in addition to the synthetic notification the test injects through the trampoline. That is two notifications per step, and the handler re-enables on each, so the disabled state can be gone before it is read and `CGEventTapIsEnabled` right after `CGEventTapEnable(false)` is not a valid check. The test polls with a bounded timeout and accepts one or two notifications per step. Apple documents only that a `kCGEventTapDisabled` event is passed to the callback when a tap is unresponsive or the user requests it (CGEventTapEnable page); the echo after an explicit disable is inferred from the counters, not documented.
 
 ## TCC permission flow (as the code uses it)
 
@@ -71,8 +73,8 @@ Test names: `TestTap_CreateSessionTapReportsTrustState`, `TestTap_ListenOnlyReje
 - The first line is `before: AXIsProcessTrusted=<bool> CGPreflightListenEventAccess=<bool> CGPreflightPostEventAccess=<bool>`. Record it for every run.
 - With `-prompt`: `AXIsProcessTrustedWithOptions(prompt)=<bool> CGRequestListenEventAccess=<bool> CGRequestPostEventAccess=<bool>` and then an `after:` line. Note whether a system dialog appeared and which pane it pointed to.
 - `tap installed: location=<name> listenOnly=<bool> suppress=<bool>` means the tap and its run loop source exist. If the tap cannot be created, the run exits with `tap: install run loop source: CGEventTapCreate returned NULL` on stderr and status 1. Record which case happened, with the `before:` line.
-- Once per second: `stats: {Events:N Dropped:N Suppressed:N DisabledByTimeout:N DisabledByUserInput:N Reenabled:N ReenableFailures:N} enabled=<bool>`. `Events` grows while you move the mouse or type in other apps. `Dropped` grows only when the 1024-slot event channel is full because the main loop has not drained it.
-- Re-enable path: `DisabledByTimeout` and `DisabledByUserInput` count the disable callbacks; `Reenabled` should match them and `ReenableFailures` should stay at 0; `enabled=true` should hold afterwards. These disable events are not printed by `-events`. They appear only in the counters.
+- Once per second: `stats: {Events:N Dropped:N Suppressed:N DisabledByTimeout:N DisabledByUserInput:N Reenabled:N} enabled=<bool>`. `Events` grows while you move the mouse or type in other apps. `Dropped` grows only when the 1024-slot event channel is full because the main loop has not drained it.
+- Re-enable path: `DisabledByTimeout` and `DisabledByUserInput` count the disable callbacks; `Reenabled` equals their sum (the handler calls `CGEventTapEnable(true)` once per notification and does not read the result back); `enabled=true` should hold afterwards. These disable events are not printed by `-events`. They appear only in the counters.
 - `-events`: one line per event, `event type=<n> location=(<x>,<y>) delta=(<dx>,<dy>) keycode=<n> userData=<hex>`. The type numbers are `CGEventType` values (for example 5 for mouse moved, 10 for key down, 11 for key up).
 - `-listen-only`: `Suppressed` stays at 0 and events still arrive; `-suppress` with `-listen-only` fails with `a listen-only tap cannot suppress events`.
 - `-suppress`: `Suppressed` grows with `Events`, and other apps stop receiving the same input.
