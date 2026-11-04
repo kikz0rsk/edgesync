@@ -303,7 +303,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: a table test of the wlclip payload builder asserts that `x-special/gnome-copied-files` is `copy\nfile:///...` or `cut\nfile:///...` with entries joined by LF and NO trailing LF, while `text/uri-list` keeps its CRLF-terminated lines; `go -C spikes test ./linux/portal/...` passes; the whole spike tree still builds for linux and darwin (`task spikes:cross`)
   DoD: only the payload encoding changes; the README of wlclip states the rule with the source named in spikes/linux/cmd/filepaste/README.md; commit `fix(spike): wlclip gnome-copied-files without trailing LF [FEAT-177]`
 
-- [ ] [P0-SP3-011] spikes workflow: two-monitor Xvfb that does not reset [FEAT-177, FEAT-167] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-011]
+- [x] [P0-SP3-011] spikes workflow: two-monitor Xvfb that does not reset [FEAT-177, FEAT-167] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-011]
   Needs: P0-F-012
   Files: .github/workflows/spikes.yml, qa/manual/p0-sp3-linux.md, spikes/linux/x11/README.md
   Tests: `go tool -modfile=tools/tools.mod actionlint` exits 0; in the linux job the Xvfb command carries `-noreset`, and a step after it defines two monitors with `xrandr --setmonitor` (verify the exact RandR 1.5 syntax `--setmonitor <name> <w>/<mm>x<h>/<mm>+<x>+<y> none` against the xrandr manual page and record the source) and prints `xrandr --listmonitors`; the manual script and the x11 README show the same two-line setup
