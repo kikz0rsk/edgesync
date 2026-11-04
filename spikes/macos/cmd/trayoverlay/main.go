@@ -56,6 +56,9 @@ func run() (err error) {
 	if err != nil {
 		return err
 	}
+	policy := app.Policy()
+	slog.Info("activation policy", "initial", policy.Initial, "setCalled", policy.SetCalled,
+		"setReturned", policy.SetReturned, "final", policy.Final)
 	overlay, err := ui.NewOverlay(app)
 	if err != nil {
 		return err

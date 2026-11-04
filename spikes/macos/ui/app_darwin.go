@@ -20,18 +20,47 @@ import (
 
 const libSystemPath = "/usr/lib/libSystem.B.dylib"
 
-// The numeric values of these AppKit constants are not stated on Apple's documentation pages, which only name them
-// (second-source: SDK headers as transcribed by progrium/macdriver enumtypes.gen.go (MIT) and, for the activation
-// policy and event type, servo/core-foundation-rs cocoa appkit.rs (MIT/Apache-2.0)).
+// The numeric value of this AppKit constant is not stated on Apple's documentation pages, which only name it
+// (second-source: servo/core-foundation-rs cocoa appkit.rs (MIT/Apache-2.0)).
+const eventTypeApplicationDefined = 15 // NSEventTypeApplicationDefined
+
+// ActivationPolicy is NSApplicationActivationPolicy (NSInteger). Apple documents that accessory corresponds to
+// LSUIElement = 1 in Info.plist, regular is the default for bundled apps and prohibited the default for unbundled
+// executables (developer.apple.com NSApplication.ActivationPolicy). The numeric values are second-source: SDK headers
+// as transcribed by servo/core-foundation-rs cocoa appkit.rs (MIT/Apache-2.0).
+type ActivationPolicy int
+
 const (
-	activationPolicyAccessory   = 1  // NSApplicationActivationPolicyAccessory
-	eventTypeApplicationDefined = 15 // NSEventTypeApplicationDefined
+	PolicyRegular    ActivationPolicy = 0
+	PolicyAccessory  ActivationPolicy = 1
+	PolicyProhibited ActivationPolicy = 2
 )
+
+func (p ActivationPolicy) String() string {
+	switch p {
+	case PolicyRegular:
+		return "regular(0)"
+	case PolicyAccessory:
+		return "accessory(1)"
+	case PolicyProhibited:
+		return "prohibited(2)"
+	default:
+		return fmt.Sprintf("unknown(%d)", int(p))
+	}
+}
+
+// PolicyReport records what NewApp observed and did about the activation policy.
+type PolicyReport struct {
+	Initial     ActivationPolicy
+	SetCalled   bool
+	SetReturned bool
+	Final       ActivationPolicy
+}
 
 var (
 	ErrNotMainThread    = errors.New("not on the process main thread")
 	ErrStopped          = errors.New("application run loop is not running")
-	ErrActivationPolicy = errors.New("setActivationPolicy: rejected the accessory policy")
+	ErrActivationPolicy = errors.New("activation policy is not accessory")
 	ErrNilObject        = errors.New("Objective-C call returned nil")
 	ErrSymbolNull       = errors.New("libSystem symbol resolved to NULL")
 )
@@ -41,8 +70,8 @@ type baseSelectors struct {
 }
 
 type appSelectors struct {
-	sharedApplication, setActivationPolicy, run, stop, postEvent objc.SEL
-	isMainThread, otherEvent                                     objc.SEL
+	sharedApplication, activationPolicy, setActivationPolicy, run, stop, postEvent objc.SEL
+	isMainThread, otherEvent                                                       objc.SEL
 }
 
 type dispatchAPI struct {
@@ -83,6 +112,7 @@ type App struct {
 	nsThread objc.Class
 	dispatch dispatchAPI
 	drainFn  uintptr
+	policy   PolicyReport
 
 	mu      sync.Mutex
 	pending []func() error
@@ -104,6 +134,7 @@ func NewApp() (*App, error) {
 		},
 		sel: appSelectors{
 			sharedApplication:   fw.Sel("sharedApplication"),
+			activationPolicy:    fw.Sel("activationPolicy"),
 			setActivationPolicy: fw.Sel("setActivationPolicy:"),
 			run:                 fw.Sel("run"),
 			stop:                fw.Sel("stop:"),
@@ -146,15 +177,40 @@ func NewApp() (*App, error) {
 		if a.nsApp == 0 {
 			return fmt.Errorf("NSApplication sharedApplication: %w", ErrNilObject)
 		}
-		if !objc.Send[bool](a.nsApp, a.sel.setActivationPolicy, activationPolicyAccessory) {
-			return ErrActivationPolicy
-		}
-		return nil
+		return a.ensureAccessoryPolicy()
 	})
 	if err != nil {
 		return nil, err
 	}
 	return a, nil
+}
+
+// ensureAccessoryPolicy reads the policy first: a bundle with LSUIElement = 1 already is an accessory app, so the
+// explicit call is only made when it is not. A NO from setActivationPolicy: counts as a failure unless the policy
+// reads back as accessory.
+func (a *App) ensureAccessoryPolicy() error {
+	a.policy.Initial = a.readPolicy()
+	a.policy.Final = a.policy.Initial
+	if a.policy.Initial == PolicyAccessory {
+		return nil
+	}
+	a.policy.SetCalled = true
+	a.policy.SetReturned = objc.Send[bool](a.nsApp, a.sel.setActivationPolicy, int(PolicyAccessory))
+	a.policy.Final = a.readPolicy()
+	if a.policy.Final != PolicyAccessory {
+		return fmt.Errorf("%w: initial %s, setActivationPolicy: returned %t, now %s",
+			ErrActivationPolicy, a.policy.Initial, a.policy.SetReturned, a.policy.Final)
+	}
+	return nil
+}
+
+func (a *App) readPolicy() ActivationPolicy {
+	return ActivationPolicy(objc.Send[int](a.nsApp, a.sel.activationPolicy))
+}
+
+// Policy reports what NewApp observed and did about the activation policy.
+func (a *App) Policy() PolicyReport {
+	return a.policy
 }
 
 func (a *App) requireMainThread() error {
