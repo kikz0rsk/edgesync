@@ -85,35 +85,39 @@ func TestAppKitTypes_MatchLiterals(t *testing.T) {
 func TestPasteboard_ChangeCountPolling(t *testing.T) {
 	_, board := newBoard(t)
 
-	before := board.ChangeCount()
-	if after := board.Clear(); after <= before {
-		t.Fatalf("clearContents returned change count %d, want more than %d", after, before)
-	}
-
-	baseline := board.ChangeCount()
+	start := board.ChangeCount()
 	var observed atomic.Int64
 	ctx, cancel := context.WithCancel(t.Context())
+	defer cancel()
 	watching := make(chan error, 1)
 	go func() {
-		watching <- board.Watch(ctx, pollTestPeriod, baseline, func(count int) { observed.Store(int64(count)) })
+		watching <- board.Watch(ctx, pollTestPeriod, start, func(count int) { observed.Store(int64(count)) })
 	}()
 
+	cleared := board.Clear()
+	if cleared <= start {
+		t.Fatalf("clearContents returned change count %d, want more than %d", cleared, start)
+	}
 	if err := board.SetData(TypePlainText, []byte("poll")); err != nil {
 		t.Fatalf("SetData: %v", err)
 	}
-	written := board.ChangeCount()
-	t.Logf("change count: before clear %d, baseline %d, after write %d", before, baseline, written)
+	afterWrite := board.ChangeCount()
+	// macOS bumps changeCount on ownership changes (clearContents, declareTypes:owner:), not on setData:forType:.
+	t.Logf("change count: start %d, after clear %d, after write %d (write moved the count: %t)",
+		start, cleared, afterWrite, afterWrite != cleared)
 
 	deadline := time.Now().Add(observeTimeout)
-	for observed.Load() == 0 && time.Now().Before(deadline) {
+	for observed.Load() <= int64(start) && time.Now().Before(deadline) {
 		time.Sleep(pollTestPeriod)
 	}
 	cancel()
 	if err := <-watching; !errors.Is(err, context.Canceled) {
 		t.Fatalf("Watch returned %v, want context.Canceled", err)
 	}
-	if got := int(observed.Load()); got == 0 || got < written {
-		t.Errorf("Watch reported change count %d, want at least %d", got, written)
+	got := int(observed.Load())
+	t.Logf("Watch reported change count %d", got)
+	if got <= start || got < cleared {
+		t.Errorf("Watch reported change count %d, want more than %d and at least %d", got, start, cleared)
 	}
 }
 
