@@ -153,7 +153,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   <!-- NOTE: 2026-10-30 - Tests line relaxed for wincursor: with only main.go tagged, the package has no Go files on linux and darwin, so a direct `go build ./wincursor` reports "build constraints exclude all Go files" while `go build ./...` and `go vet ./...` (what the spikes workflow runs) and `task spikes:cross` (go list omits it) pass. No main_other.go is needed for wincursor. -->
   DoD: `wininject/main.go` and `wincursor/main.go` start with `//go:build windows`; `wininject/main_other.go` (`//go:build !windows`, package main) provides a `main` that writes "windows only" to stderr and exits 2, because wininject has untagged pure logic (edges.go) that must keep building and testing on every OS; commit `fix(spikes): tag windows-only spike mains [FEAT-177]`
 
-- [ ] [P0-SP1-012] winsvc helper builds on linux and darwin [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-012]
+- [x] [P0-SP1-012] winsvc helper builds on linux and darwin [FEAT-177] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-012]
   Needs: P0-SP1-004, P0-SP1-011
   Files: spikes/winsvc/helper/main_other.go
   Tests: on linux/amd64 and darwin/arm64 with CGO_ENABLED=0, `go build -o NUL ./winsvc/helper` and `go vet ./winsvc/helper` succeed; `go -C spikes test ./winsvc/...` still passes on windows (geometry tests) and on linux
