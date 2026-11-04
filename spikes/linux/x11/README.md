@@ -58,16 +58,18 @@ GOOS=linux CGO_ENABLED=0 go -C spikes vet -tags integration ./linux/...
 
 ## Xvfb setup for the integration tests
 
-Start a display with a 3840x1080 screen and define two RandR 1.5 monitors side by side. The exact `--setmonitor`
-geometry syntax below was written from the xrandr manual and was NOT run on the authoring host; if xrandr rejects it
-or Xvfb does not support `--setmonitor`, record the xrandr output and use an equivalent layout with `-screen` (the
-test then fails on `TestRandR_MonitorsListed` until two monitors exist, which is the expected signal):
+Start a display with a 3840x1080 screen and define two RandR 1.5 monitors side by side. `-noreset` keeps the server
+running when its last client disconnects (Xvfb otherwise resets, and a connection during the reset gets EOF).
+The `--setmonitor` syntax is verified against the xrandr 1.5 manual page (synopsis `--setmonitor name geometry outputs`,
+geometry `w/mmwxh/mmh+x+y`; https://manpages.ubuntu.com/manpages/noble/en/man1/xrandr.1.html), but it has NOT yet been run
+on a live Xvfb. If xrandr rejects it or Xvfb does not support `--setmonitor`, record the xrandr output and use an equivalent
+layout with `-screen` (the test then fails on `TestRandR_MonitorsListed` until two monitors exist, which is the expected signal):
 
 ```
-Xvfb :99 -screen 0 3840x1080x24 &
+Xvfb :99 -screen 0 3840x1080x24 -noreset &
 export DISPLAY=:99
-xrandr --setmonitor edgesync-left 1920x1080+0+0 none
-xrandr --setmonitor edgesync-right 1920x1080+1920+0 none
+xrandr --setmonitor edgesync-left 1920/508x1080/286+0+0 none
+xrandr --setmonitor edgesync-right 1920/508x1080/286+1920+0 none
 xrandr --listmonitors
 ```
 

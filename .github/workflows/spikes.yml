@@ -130,8 +130,13 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y xvfb x11-xserver-utils xdotool
       - name: Start Xvfb
         run: |
-          Xvfb :99 -screen 0 3840x1080x24 &
+          Xvfb :99 -screen 0 3840x1080x24 -noreset &
           echo "DISPLAY=:99" >> "$GITHUB_ENV"
+      - name: Define two monitors on Xvfb
+        run: |
+          xrandr --setmonitor edgesync-left 1920/508x1080/286+0+0 none
+          xrandr --setmonitor edgesync-right 1920/508x1080/286+1920+0 none
+          xrandr --listmonitors
       - uses: actions/checkout@v7.0.1
       - uses: actions/setup-go@v7.0.0
         with:

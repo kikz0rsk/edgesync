@@ -6,8 +6,8 @@ Estimated time: 240 minutes   Needs admin: yes (only the apt package installs in
 Nothing in this script has been run by its author. The commands and flags were read from the spike sources and READMEs
 under `spikes/linux/` (the filepaste files as merged on main with P0-SP3-006), and the non-Gio build commands were
 dry-run on the Windows host. The Gio builds (`wloverlay -mode gio`, `giodroplinux`) need cgo and the Gio Linux packages
-and were not compiled anywhere. The Xvfb two-monitor setup with `xrandr --setmonitor` is UNVERIFIED: its syntax was
-written from the xrandr manual and never run. Package names and external tool syntax (xdotool, xrandr, Xephyr options,
+and were not compiled anywhere. The Xvfb two-monitor setup with `xrandr --setmonitor` has its syntax checked against the
+xrandr 1.5 manual page (quoted in the commit `ci(spikes): two-monitor Xvfb with -noreset [FEAT-177]`) but was never run on a live server. Package names and external tool syntax (xdotool, xrandr, Xephyr options,
 dbus-run-session, dpkg-query) come from the spike READMEs and from `.github/workflows/spikes.yml`, not from a run on the
 box. Treat every output as the first real evidence, not as a confirmed fact.
 
@@ -350,17 +350,18 @@ Part B - X11 (Xvfb and Xephyr on the box, P0-SP3-M02). The X servers here are se
 name their display with `-display` or `DISPLAY=`; never use `DISPLAY=:0` for the grab, the injection or any run that holds
 input.
 
-### Step 16 - Start Xvfb and define the two monitors (`xrandr --setmonitor`, UNVERIFIED)
-- Do: in one terminal (it keeps the server running):
+### Step 16 - Start Xvfb and define the two monitors (`xrandr --setmonitor`, syntax checked, not yet run)
+- Do: in one terminal (it keeps the server running). `-noreset` keeps the server alive when its last client disconnects:
   ```
-  Xvfb :99 -screen 0 3840x1080x24 &
+  Xvfb :99 -screen 0 3840x1080x24 -noreset &
   export DISPLAY=:99
-  xrandr --setmonitor edgesync-left 1920x1080+0+0 none
-  xrandr --setmonitor edgesync-right 1920x1080+1920+0 none
+  xrandr --setmonitor edgesync-left 1920/508x1080/286+0+0 none
+  xrandr --setmonitor edgesync-right 1920/508x1080/286+1920+0 none
   xrandr --listmonitors
   ```
-  The `--setmonitor` lines are written from the xrandr manual and were never run. The Xvfb screen size and monitor geometry
-  are the ones of `spikes/linux/x11/README.md` and `.github/workflows/spikes.yml`.
+  The `--setmonitor` syntax `name geometry outputs` with geometry `w/mmwxh/mmh+x+y` is checked against the xrandr 1.5 manual
+  page; it was never run on a live server. The Xvfb screen size and monitor geometry are the ones of
+  `spikes/linux/x11/README.md` and `.github/workflows/spikes.yml`.
 - Expect: `xrandr --listmonitors` lists two monitors or more, including `edgesync-left` and `edgesync-right` with their
   geometry (the header line format of xrandr is not checked here). If xrandr rejects `--setmonitor` or Xvfb does not support it, the rejection text is the observation.
 - Record: the full output of the three xrandr commands verbatim, and the `xvfb` package version from Preparation step 4
