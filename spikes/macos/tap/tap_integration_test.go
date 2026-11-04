@@ -5,6 +5,7 @@ package tap
 import (
 	"context"
 	"errors"
+	"sync"
 	"testing"
 	"time"
 
@@ -17,6 +18,9 @@ const (
 	testUserData    int64 = 0x45444753
 	observeTimeout        = 2 * time.Second
 	startTimeout          = 5 * time.Second
+	pollInterval          = 5 * time.Millisecond
+	settleQuiet           = 150 * time.Millisecond
+	closeRounds           = 50
 	mouseButtonLeft       = 0
 )
 
@@ -151,7 +155,44 @@ func observeSyntheticEvent(t *testing.T, lib *fw.Lib, post *poster, tap *Tap, st
 	}
 }
 
-// exerciseReenable calls the registered C trampoline the way the window server does, with the tap disabled first.
+type disableCounters struct {
+	timeout, userInput, reenabled uint64
+}
+
+func disableCountersOf(s Stats) disableCounters {
+	return disableCounters{timeout: s.DisabledByTimeout, userInput: s.DisabledByUserInput, reenabled: s.Reenabled}
+}
+
+func waitFor(timeout time.Duration, condition func() bool) bool {
+	deadline := time.Now().Add(timeout)
+	for !condition() {
+		if time.Now().After(deadline) {
+			return false
+		}
+		time.Sleep(pollInterval)
+	}
+	return true
+}
+
+// settled waits until the tap is enabled and the disable counters stop moving, so a late notification from the
+// previous step cannot land in the next step's window.
+func settled(tap *Tap) bool {
+	last := disableCountersOf(tap.Stats())
+	stableSince := time.Now()
+	return waitFor(observeTimeout, func() bool {
+		current := disableCountersOf(tap.Stats())
+		if current != last {
+			last, stableSince = current, time.Now()
+			return false
+		}
+		return time.Since(stableSince) >= settleQuiet && tap.Enabled()
+	})
+}
+
+// exerciseReenable calls the registered C trampoline the way the window server does, after disabling the tap.
+// The CI run showed two notifications per step: our synthetic call plus one kCGEventTapDisabledByUserInput that
+// macOS delivers on the loop thread after CGEventTapEnable(false). The handler re-enables on each, so the disabled
+// state may be gone before it can be read; the test therefore polls instead of reading it right after the call.
 func exerciseReenable(t *testing.T, tap *Tap) {
 	t.Helper()
 	var callTrampoline func(proxy uintptr, eventType uint32, event, refcon uintptr) uintptr
@@ -160,27 +201,78 @@ func exerciseReenable(t *testing.T, tap *Tap) {
 	for _, c := range []struct {
 		name      string
 		eventType EventType
-		count     func(Stats) uint64
+		count     func(disableCounters) uint64
 	}{
-		{"timeout", EventTapDisabledByTimeout, func(s Stats) uint64 { return s.DisabledByTimeout }},
-		{"user input", EventTapDisabledByUserInput, func(s Stats) uint64 { return s.DisabledByUserInput }},
+		{"timeout", EventTapDisabledByTimeout, func(d disableCounters) uint64 { return d.timeout }},
+		{"user input", EventTapDisabledByUserInput, func(d disableCounters) uint64 { return d.userInput }},
 	} {
-		before := tap.Stats()
+		if !settled(tap) {
+			t.Fatalf("%s: tap did not settle as enabled before the step", c.name)
+		}
+		before := disableCountersOf(tap.Stats())
+
 		tap.api.enable(tap.port, false)
-		if tap.Enabled() {
-			t.Fatalf("%s: tap still enabled after CGEventTapEnable(false)", c.name)
+		reacted := waitFor(observeTimeout, func() bool {
+			return !tap.Enabled() || tap.Stats().DisabledByUserInput > before.userInput
+		})
+		if !reacted {
+			t.Fatalf("%s: CGEventTapEnable(false) had no visible effect within %v", c.name, observeTimeout)
 		}
+
 		callTrampoline(0, uint32(c.eventType), 0, tap.refcon)
-		after := tap.Stats()
-		if !tap.Enabled() {
-			t.Errorf("%s: tap was not re-enabled by the callback", c.name)
+		if !settled(tap) {
+			t.Fatalf("%s: tap was not re-enabled and settled within %v", c.name, observeTimeout)
 		}
-		if c.count(after) != c.count(before)+1 {
-			t.Errorf("%s: disable counter %d -> %d, want +1", c.name, c.count(before), c.count(after))
+		after := disableCountersOf(tap.Stats())
+		t.Logf("%s: timeout %d -> %d, user input %d -> %d, reenabled %d -> %d", c.name,
+			before.timeout, after.timeout, before.userInput, after.userInput, before.reenabled, after.reenabled)
+
+		notifications := after.timeout - before.timeout + after.userInput - before.userInput
+		if own := c.count(after) - c.count(before); own < 1 {
+			t.Errorf("%s: own disable counter moved by %d, want at least 1", c.name, own)
 		}
-		if after.Reenabled != before.Reenabled+1 || after.ReenableFailures != before.ReenableFailures {
-			t.Errorf("%s: reenabled %d -> %d, failures %d -> %d", c.name, before.Reenabled, after.Reenabled, before.ReenableFailures, after.ReenableFailures)
+		if notifications < 1 || notifications > 2 {
+			t.Errorf("%s: %d disable notifications, want 1 (synthetic) or 2 (synthetic plus the macOS notification)", c.name, notifications)
 		}
+		if got := after.reenabled - before.reenabled; got != notifications {
+			t.Errorf("%s: reenabled moved by %d, want one per notification (%d)", c.name, got, notifications)
+		}
+	}
+}
+
+func TestTap_CloseIsIdempotentAndRaceFree(t *testing.T) {
+	lib, err := fw.Load()
+	if err != nil {
+		t.Fatalf("Load: %v", err)
+	}
+	for i := range closeRounds {
+		ctx, cancel := context.WithTimeout(context.Background(), startTimeout)
+		tap, err := Start(ctx, lib, Config{Location: LocationSession, ListenOnly: true})
+		cancel()
+		if errors.Is(err, ErrTapCreate) {
+			t.Logf("session tap was not created: %v; Close is not exercised", err)
+			return
+		}
+		if err != nil {
+			t.Fatalf("round %d: Start: %v", i, err)
+		}
+
+		var wg sync.WaitGroup
+		for range 4 {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				tap.Close()
+			}()
+		}
+		wg.Wait()
+		tap.Close()
+		if tap.Enabled() {
+			t.Errorf("round %d: tap reports enabled after Close", i)
+		}
+	}
+	if n := registeredTaps(); n != 0 {
+		t.Errorf("dispatch table holds %d taps after the rounds, want 0", n)
 	}
 }
 

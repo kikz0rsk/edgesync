@@ -101,7 +101,6 @@ type Stats struct {
 	DisabledByTimeout   uint64
 	DisabledByUserInput uint64
 	Reenabled           uint64
-	ReenableFailures    uint64
 }
 
 type counters struct {
@@ -111,7 +110,6 @@ type counters struct {
 	disabledByTimeout   atomic.Uint64
 	disabledByUserInput atomic.Uint64
 	reenabled           atomic.Uint64
-	reenableFailures    atomic.Uint64
 }
 
 type tapAPI struct {
@@ -142,6 +140,8 @@ type Tap struct {
 	loop       *loop
 	refcon     uintptr
 	port       uintptr
+	portMu     sync.RWMutex
+	portLive   bool
 	listenOnly bool
 	suppress   atomic.Bool
 	events     chan Event
@@ -242,8 +242,14 @@ func (t *Tap) install(cfg Config) (uintptr, func(), error) {
 		t.loopAPI.release(port)
 		return 0, nil, ErrSourceCreate
 	}
+	t.portMu.Lock()
 	t.port = port
+	t.portLive = true
+	t.portMu.Unlock()
 	teardown := func() {
+		t.portMu.Lock()
+		t.portLive = false
+		t.portMu.Unlock()
 		t.loopAPI.machPortInvalidate(port)
 		t.loopAPI.release(source)
 		t.loopAPI.release(port)
@@ -274,13 +280,12 @@ func (t *Tap) handleEvent(eventType EventType, event uintptr) uintptr {
 	return event
 }
 
+// reenable is idempotent: CGEventTapEnable(true) on an enabled tap changes nothing, so the second of two disable
+// notifications for one event is harmless. The result is not read back here; CGEventTapIsEnabled is not reliable
+// right after CGEventTapEnable.
 func (t *Tap) reenable() {
 	t.api.enable(t.port, true)
-	if t.api.isEnabled(t.port) {
-		t.stats.reenabled.Add(1)
-		return
-	}
-	t.stats.reenableFailures.Add(1)
+	t.stats.reenabled.Add(1)
 }
 
 func (t *Tap) publish(eventType EventType, event uintptr) {
@@ -303,8 +308,11 @@ func (t *Tap) Events() <-chan Event {
 	return t.events
 }
 
+// Enabled is false once the tap is closed; the port is released with the loop thread.
 func (t *Tap) Enabled() bool {
-	return t.api.isEnabled(t.port)
+	t.portMu.RLock()
+	defer t.portMu.RUnlock()
+	return t.portLive && t.api.isEnabled(t.port)
 }
 
 func (t *Tap) SetSuppress(on bool) error {
@@ -323,10 +331,10 @@ func (t *Tap) Stats() Stats {
 		DisabledByTimeout:   t.stats.disabledByTimeout.Load(),
 		DisabledByUserInput: t.stats.disabledByUserInput.Load(),
 		Reenabled:           t.stats.reenabled.Load(),
-		ReenableFailures:    t.stats.reenableFailures.Load(),
 	}
 }
 
+// Close is idempotent, safe from any goroutine, and returns after the loop thread has exited.
 func (t *Tap) Close() {
 	t.closeOnce.Do(func() {
 		t.loop.stop()
