@@ -122,9 +122,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: spike must demonstrate (user run, admin for install): helper launched into the active console session with a winlogon-derived token + TokenUIAccess; helper logs input-desktop switches (Default, Winlogon, Screen-saver) within 200 ms; injected mouse square + typed text land in an elevated Task Manager, on a UAC prompt (Escape cancels it), on the lock screen (moves pointer, shows the password field); `SoftwareSASGeneration` value read and logged; SendSAS opens the Ctrl+Alt+Del screen; after reboot with nobody logged on, the helper runs at the sign-in screen and injects movement; service restarts the helper after `taskkill /F`
   DoD: spike gates green; install/uninstall scripts idempotent and require admin; all logs to `%ProgramData%\EdgeSyncSpike\`; commit `spike(win): service, secure helper and SendSAS [FEAT-177]`
 
-- [ ] [P0-SP1-005] Named-pipe security and TLS signing-proxy spike [FEAT-177, FEAT-050, FEAT-051] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-005]
+- [x] [P0-SP1-005] Named-pipe security and TLS signing-proxy spike [FEAT-177, FEAT-050, FEAT-051] [tier:haiku] [owner:SP1] [brief:briefs/streams/p0-sp1.md#item-p0-sp1-005]
   Needs: P0-F-005
   Files: spikes/winpipe/sddl_windows.go, spikes/winpipe/verify_windows.go, spikes/winpipe/signer.go, spikes/winpipe/signer_test.go, spikes/winpipe/pipe_windows_test.go, spikes/winpipe/cmd/pipeserver/main.go, spikes/winpipe/cmd/pipeclient/main.go, spikes/winpipe/README.md
+  <!-- NOTE: 2026-11-04 - Files as listed (8 files incl. both commands); measured on this host in-process: signing round trip incl. client verify mean 83 us over 500 samples (net.Pipe plus TLS over 127.0.0.1, not a real pipe); TLS 1.3 handshake through the proxy about 0.5 to 1.0 ms versus a local key about 0.5 to 1.0 ms (overhead inside the coarse-clock noise, D-123: batch means only); a named-pipe TLS 1.3 handshake through the proxy took 1.05 ms on one run. Hostile-client table: 18 cases pass. -->
   Tests: TestSignerProxy_TLS13HandshakeOverLoopback (server private key only reachable through the proxy), TestPipe_SDDLDeniesOtherSID (constructs the descriptor and checks the ACE list), TestPipe_ClientVerifiesServerSID, TestPipe_FirstInstanceRejectsSecondServer (host, local named pipes); spike must demonstrate (user run): a second Windows account cannot open the pipe; handshake overhead of the proxy in ms
   DoD: spike gates green; uses github.com/Microsoft/go-winio v0.6.4; commit `spike(win): pipe ACLs and TLS signing proxy [FEAT-177]`
 
@@ -251,9 +252,10 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: generated package compiles with `GOOS=linux`; TestXI2_RawMotionOnXvfb (integration) receives XI_RawMotion while a grab is active, or the README records the exact generation failure
   DoD: spike gates green; xcb-proto version + licence (MIT) recorded; commit `spike(linux): XI2 binding generation assessment [FEAT-177]`
 
-- [ ] [P0-SP3-006] Linux lazy file-paste behaviour of file managers [FEAT-177, FEAT-110, FEAT-113] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-006]
+- [x] [P0-SP3-006] Linux lazy file-paste behaviour of file managers [FEAT-177, FEAT-110, FEAT-113] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-006]
   Needs: P0-SP3-003, P0-SP3-004
   Files: spikes/linux/cmd/filepaste/main.go, spikes/linux/cmd/filepaste/README.md
+  <!-- NOTE: 2026-11-04 - Files extended (approved): spikes/linux/cmd/filepaste/probe.go (platform-neutral logic: flags and validation, target list parser, payload encoding for uri-list, gnome-copied-files without trailing LF and KDE cutselection 0/1, staging writer, exchange log model), probe_test.go (host tests, race-tested staging writer) and main_other.go (!linux stub, exits 2). -->
   Tests: spike must demonstrate (user run): X11 mode (Xephyr nested server or XWayland app) and portal mode offer text/uri-list + x-special/gnome-copied-files; the reply is delayed 5 s, 30 s and 120 s while a synthetic file is written to staging; record for Nautilus whether paste waits, shows progress, times out (and after how long), and whether the pasted file is complete
   DoD: spike gates green incl. `GOOS=linux` vet; commit `spike(linux): file manager lazy paste behaviour [FEAT-177]`
 
@@ -287,6 +289,12 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Files: briefs/spikes/sp3.md
   Tests: covers EI codec, InputCapture (zones, barriers, activation, release, recreation, restore tokens), RemoteDesktop injection, portal clipboard and session-activity dependence, X11 capture/injection/selections, XI2 generation, lazy file paste mechanism recommendation for X11 and Wayland, XDND, Wayland DnD limits, GNOME switch indicator, Gio Linux drop, guard semantics under barrier activation; each with go/no-go and the decision it confirms or contradicts (D-02, D-05, D-11, D-12, D-18, D-39)
   DoD: contradictions listed under "Requires user decision"; commit `docs(spikes): SP3 findings [FEAT-177]`
+
+- [ ] [P0-SP3-010] wlclip gnome-copied-files payload without trailing LF [FEAT-177, FEAT-110] [tier:haiku] [owner:SP3] [brief:briefs/streams/p0-sp3.md#item-p0-sp3-010]
+  Needs: P0-SP3-006
+  Files: spikes/linux/cmd/wlclip/main.go, spikes/linux/portal/clipboard_test.go
+  Tests: a table test of the wlclip payload builder asserts that `x-special/gnome-copied-files` is `copy\nfile:///...` or `cut\nfile:///...` with entries joined by LF and NO trailing LF, while `text/uri-list` keeps its CRLF-terminated lines; `go -C spikes test ./linux/portal/...` passes; the whole spike tree still builds for linux and darwin (`task spikes:cross`)
+  DoD: only the payload encoding changes; the README of wlclip states the rule with the source named in spikes/linux/cmd/filepaste/README.md; commit `fix(spike): wlclip gnome-copied-files without trailing LF [FEAT-177]`
 
 ### SP4 - macOS via purego (compile + CI only)
 

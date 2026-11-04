@@ -81,3 +81,11 @@ User-owned. X11 results (Xvfb test output or the spikes workflow log, Xephyr obs
 
 ## Item P0-SP3-009
 `briefs/spikes/sp3.md`: summary table; sections per mechanism; "Recommended design for P2 X1/Y1 and P4 F4/F5" (EI codec API, portal session manager incl. recreation, X11 delta source (XI2 or warp), clipboard availability rules on GNOME, the lazy file paste mechanism for X11 and for Wayland, DnD scope per display server, switch indicator on GNOME, how edge guards behave with barrier activation); "Requires user decision" for every contradiction of D-02, D-05, D-11, D-12, D-18, D-39 (e.g. indicator not an overlay on GNOME, DnD direction not possible, file paste not lazy).
+
+## Item P0-SP3-010
+P0-SP3-006 (`spikes/linux/cmd/filepaste/README.md`) found that the `x-special/gnome-copied-files` payload built by `spikes/linux/cmd/wlclip` ends with an LF
+and that the Nautilus parser rejects that (the format is `copy` or `cut`, then LF, then the file URIs joined by LF, no trailing LF; read the source the filepaste README cites and
+cite it again in the wlclip README). Fix the encoder in `spikes/linux/cmd/wlclip/main.go` only; keep `text/uri-list` as it is (CRLF-terminated lines per RFC 2483). Add a table test for
+the payload builder (if the builder lives in `spikes/linux/portal`, test it in `spikes/linux/portal/clipboard_test.go`). Do not touch any other behaviour. If the builder is not a pure
+function yet, extract exactly that function (no other refactoring) so it can be tested on the host.
+
