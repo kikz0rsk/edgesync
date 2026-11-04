@@ -396,7 +396,7 @@ Spike gate (used in every spike item's DoD, "spike gates"):
   Tests: TestPipe_OwnerOnlySDDL, TestPipe_RoundTripLatency1KiB (host, local pipe); TestSock_PeerCredMatchesUID (linux/darwin, compile-checked on host via cross vet, run in the spikes workflow)
   DoD: spike gates green incl. cross vet; commit `spike(ipc): pipe and socket peer verification [FEAT-177]`
 
-- [ ] [P0-SP5-007] Manual script for SP5 [FEAT-177] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-007]
+- [x] [P0-SP5-007] Manual script for SP5 [FEAT-177] [tier:haiku] [owner:SP5] [brief:briefs/streams/p0-sp5.md#item-p0-sp5-007]
   Needs: P0-SP5-001, P0-SP5-002, P0-SP5-003
   Files: qa/manual/p0-sp5-core.md
   Tests: script follows `qa/manual/README.md`; covers the Gio editor feel test, mdnsprobe on all three machines, quicbench LAN mode between the two Windows PCs (wired)
